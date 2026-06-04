@@ -8,7 +8,7 @@
 | This file is the single source of truth for what each plan includes.
 |
 | - "features"  : Marketing copy shown on pricing page / plan cards.
-|                 Update these when your messaging changes.
+|                 Update these when messaging changes.
 |
 | - "limits"    : Enforced by PlanGate service in code.
 |                 null = unlimited.
@@ -27,7 +27,8 @@ return [
     'starter' => [
 
         'features' => [
-            'Up to 200 invoices per month',
+            'Up to 5 customers',
+            'Up to 300 invoices per month',
             '1 invoice template',
             '1 user',
             'Basic reporting',
@@ -35,8 +36,8 @@ return [
         ],
 
         'limits' => [
-            'invoices_per_month' => 200,
-            'customers'          => 50,
+            'invoices_per_month' => 300,
+            'customers'          => 8,
             'users'              => 1,
             'templates'          => 1,
             'custom_branding'    => false,
@@ -51,6 +52,7 @@ return [
     'professional' => [
 
         'features' => [
+            'Up to 500 customers',
             'Up to 1000 invoices per month',
             '5 invoice templates',
             'Up to 5 users',

@@ -4,12 +4,17 @@ namespace App\Modules\Customers\Services;
 
 use App\Models\Customer;
 use App\Models\User;
+use App\Services\PlanGate;
 use App\Modules\Customers\Resources\CustomerResource;
 use App\Services\CodeGeneratorService;
 use Illuminate\Http\JsonResponse;
 
 class CustomerService
 {
+    public function __construct(
+        protected PlanGate $planGate = new PlanGate,
+    ) {}
+
     public function index(User $user): JsonResponse
     {
         $customers = Customer::where('organization_id', $user->organization_id)
@@ -24,6 +29,16 @@ class CustomerService
 
     public function store(User $user, array $data): JsonResponse
     {
+        $currentCount = Customer::where('organization_id', $user->organization_id)->count();
+        
+        if (! $this->planGate->allows($user, 'customers', $currentCount)) {
+            return response()->json([
+                'status'  => 'limit_reached',
+                'message' => "You've reached the customer limit for the {$this->planGate->getPlanName($user)} plan. Upgrade to add more.",
+                'plan'    => $this->planGate->getPlanName($user),
+            ], 403);
+        }
+        
         // Check email unique per org
         $exists = Customer::where('organization_id', $user->organization_id)
             ->where('email', $data['email'])

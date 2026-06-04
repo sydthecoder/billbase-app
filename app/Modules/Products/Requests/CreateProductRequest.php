@@ -24,4 +24,21 @@ class CreateProductRequest extends FormRequest
             'status'              => 'sometimes|in:active,inactive',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => __('products.messages.name_required'),
+            'price.required' => __('products.messages.price_required'),
+            'price.numeric' => __('products.messages.price_numeric'),
+            'price.min' => __('products.messages.price_min'),
+            'product_category_id.exists' => __('products.messages.category_exists'),
+            'sku.unique' => __('products.messages.sku_unique'),
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return __('products.attributes');
+    }
 }

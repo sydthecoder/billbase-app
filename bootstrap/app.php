@@ -3,6 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -37,7 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     /* Rate limit default for all api routes */
     ->booted(function () {
-        RateLimiter::for('api', function (Request $request) {
+        RateLimiter::for('api', function ($request) {
             return Limit::perMinute(60)->by(
                 $request->user()?->id ?: $request->ip()
             );
