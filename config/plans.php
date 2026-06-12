@@ -20,58 +20,41 @@
 | Prices live in the DB (needed for billing integrations).
 | Feature gates live here (code-level decisions, deployed not queried).
 |
+| Invoicing limits exist in feature but not limits cause we offer unlimitd invoicing
+| 
+|
 */
 
 return [
 
-    'starter' => [
+    'free' => [
 
         'features' => [
-            'Up to 5 customers',
-            'Up to 300 invoices per month',
-            '1 invoice template',
-            '1 user',
-            'Basic reporting',
+            'Single User Access',
+            'Unlimited invoices',
+            '5 Maximum Customers',
             'Email support',
         ],
 
         'limits' => [
-            'invoices_per_month' => 300,
-            'customers'          => 8,
             'users'              => 1,
-            'templates'          => 1,
-            'custom_branding'    => false,
-            'mail_settings'      => false,   // must use PayFlow default mailer
-            'reporting'          => 'basic',
-            'quotes'             => true,
-            'bank_account'       => true,
+            'customers'          => 5,
         ],
 
     ],
 
-    'professional' => [
+    'pro' => [
 
         'features' => [
-            'Up to 500 customers',
-            'Up to 1000 invoices per month',
-            '5 invoice templates',
-            'Up to 5 users',
-            'Advanced reporting',
-            'Customer management',
-            'Custom mail settings',
+            'Single User Access',
+            'Unlimited invoices',
+            '50 Maximum Customers',
             'Priority email support',
         ],
 
         'limits' => [
-            'invoices_per_month' => 1000,
-            'customers'          => 500,
-            'users'              => 5,
-            'templates'          => 5,
-            'custom_branding'    => true,
-            'mail_settings'      => true,
-            'reporting'          => 'advanced',
-            'quotes'             => true,
-            'bank_account'       => true,
+            'users'              => 1,
+            'customers'          => 50,
         ],
 
     ],
@@ -79,27 +62,15 @@ return [
     'enterprise' => [
 
         'features' => [
+            'Multi User Access',
             'Unlimited invoices',
-            'All invoice templates',
-            'Unlimited users',
-            'Full reporting & analytics',
-            'Customer management',
-            'Custom branding',
-            'Custom mail settings',
-            'PayFast recurring billing',
+            'Unlimited Customers',
             'Dedicated support',
         ],
 
         'limits' => [
-            'invoices_per_month' => null,    // unlimited
-            'customers'          => null,
             'users'              => null,
-            'templates'          => null,
-            'custom_branding'    => true,
-            'mail_settings'      => true,
-            'reporting'          => 'full',
-            'quotes'             => true,
-            'bank_account'       => true,
+            'customers'          => null,
         ],
 
     ],

@@ -47,15 +47,35 @@ class InvoiceController extends Controller
         return $this->invoiceService->send(auth()->user(), $id);
     }
 
-    public function pdf(int $id): \Illuminate\Http\Response
+    public function pdf(int $id): mixed
     {
         $invoice = Invoice::where('organization_id', auth()->user()->organization_id)
             ->findOrFail($id);
+
+        if ($invoice->pdf_path) {
+            return redirect($this->invoicePdfService->presignedUrl($invoice->pdf_path));
+        }
 
         $pdf = $this->invoicePdfService->generate($invoice);
 
         return response($pdf, 200)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="' . $invoice->invoice_number . '.pdf"');
+    }
+
+    public function pdfDownload(int $id): mixed
+    {
+        $invoice = Invoice::where('organization_id', auth()->user()->organization_id)
+            ->findOrFail($id);
+
+        if ($invoice->pdf_path) {
+            return redirect($this->invoicePdfService->presignedUrl($invoice->pdf_path, true));
+        }
+
+        $pdf = $this->invoicePdfService->generate($invoice);
+
+        return response($pdf, 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $invoice->invoice_number . '.pdf"');
     }
 }

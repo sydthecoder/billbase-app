@@ -4,6 +4,7 @@ namespace App\Modules\Settings\Services;
 
 use App\Models\Organization;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 
 class OrganizationProfileService
@@ -49,6 +50,34 @@ class OrganizationProfileService
             'tax_number' => $org->tax_number,
             'currency'   => $org->currency,
             'status'     => $org->status,
+            'logo_url' => $org->logo_url,
         ];
+    }
+
+    public function uploadLogo(User $user, $file): JsonResponse
+    {
+        $org = $user->organization;
+
+        $extension = $file->getClientOriginalExtension();
+        $filename  = 'logo.' . $extension;
+        $path      = "logos/{$org->org_code}/{$filename}";
+
+        // Delete old logo from R2 if exists
+        if ($org->logo_filename) {
+            Storage::disk('r2')->delete($org->logo_filename);
+        }
+
+        // Upload to R2
+        Storage::disk('r2')->put($path, file_get_contents($file), 'public');
+
+        // Save full public URL
+        $publicUrl = env('CLOUDFLARE_R2_PUBLIC_URL') . '/' . $path;
+        $org->update(['logo_filename' => $publicUrl]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Logo uploaded successfully.',
+            'data'    => ['logo_url' => $publicUrl],
+        ]);
     }
 }

@@ -9,19 +9,27 @@ use Illuminate\Support\Facades\RateLimiter;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        /**
+         * If no token stop redirect to default laravel login web route
+         * Instead throw 401 error
+         */
+        $middleware->redirectGuestsTo(fn (Request $request) => null);
+
         $middleware->append([
             \Illuminate\Http\Middleware\HandleCors::class,
             \App\Http\Middleware\AttachAuthTokenFromCookie::class,
         ]);
     })
-    /* Rate limit friendly message */
+
     ->withExceptions(function (Exceptions $exceptions): void {
+        /**
+         * Default rate limitting across most generic routes
+         */
         $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, $request) {
             $seconds = (int) $e->getHeaders()['Retry-After'];
             
@@ -37,8 +45,22 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => $message,
             ], 429);
         });
+
+        /**
+         * Returns 422 and its specific errors instead of redirecting and throwing 404
+         */
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e, Request $request) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validation failed.',
+                'errors'  => $e->errors(),
+            ], 422);
+        });
     })
-    /* Rate limit default for all api routes */
+    
+    /**
+     * Apply the rate limitting
+     */
     ->booted(function () {
         RateLimiter::for('api', function ($request) {
             return Limit::perMinute(60)->by(

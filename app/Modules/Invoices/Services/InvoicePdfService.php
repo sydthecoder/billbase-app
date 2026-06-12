@@ -16,6 +16,7 @@ class InvoicePdfService extends BasePdfService
             'items',
             'organization',
             'organization.bankAccount',
+            'organization.activeSubscription.plan',
             'createdBy',
             'payments',
         ]);
@@ -25,31 +26,37 @@ class InvoicePdfService extends BasePdfService
         $resolvedPrefs = [
             'brand_color'      => $prefs?->brand_color      ?? config('settings.organization_preferences.brand_color'),
             'invoice_footer'   => $prefs?->invoice_footer   ?? config('settings.organization_preferences.invoice_footer'),
+            'pdf_branding'   => $prefs?->pdf_branding       ?? config('settings.organization_preferences.pdf_branding'),
             'invoice_template' => $prefs?->invoice_template ?? config('settings.organization_preferences.invoice_template'),
         ];
 
-        $template = $resolvedPrefs['invoice_template'];
-
-        $html = view("pdfs.invoices.{$template}", [
+        return $this->createPdf("pdfs.invoices.{$resolvedPrefs['invoice_template']}", [
             'invoice' => $invoice,
             'prefs'   => $resolvedPrefs,
             'tax'     => config('settings.tax'),
-        ])->render();
-
-        $mpdf = $this->createMpdf();
-        $mpdf->WriteHTML($html);
-
-        return $mpdf->Output('', 'S');
+        ])->output();
     }
 
     public function generateAndStore(Invoice $invoice): string
     {
-        $pdf      = $this->generate($invoice);
-        $filename = 'invoices/' . $invoice->organization->org_code . '/' . $invoice->invoice_number . '.pdf';
+        $pdfContent = $this->generate($invoice);
+        $path       = "invoices/{$invoice->organization->org_code}/{$invoice->invoice_number}.pdf";
 
-        // Store permanently — paid invoices are frozen legal documents
-        Storage::disk('local')->put($filename, $pdf);
+        Storage::disk('r2')->put($path, $pdfContent, 'private');
 
-        return $filename;
+        return $path;
+    }
+
+    public function presignedUrl(string $path, bool $download = false): string
+    {
+        $filename = basename($path);
+
+        return Storage::disk('r2')->temporaryUrl(
+            $path,
+            now()->addMinutes(10),
+            $download ? [
+                'ResponseContentDisposition' => "attachment; filename=\"{$filename}\"",
+            ] : []
+        );
     }
 }

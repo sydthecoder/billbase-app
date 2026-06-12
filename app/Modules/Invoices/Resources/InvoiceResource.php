@@ -30,7 +30,6 @@ class InvoiceResource extends JsonResource
             'viewed_at'        => $this->viewed_at,
             'paid_at'          => $this->paid_at,
             'billing'          => [
-                'name'           => $this->billing_name,
                 'company'        => $this->billing_company,
                 'vat_number'     => $this->billing_vat_number,
                 'street_address' => $this->billing_street_address,

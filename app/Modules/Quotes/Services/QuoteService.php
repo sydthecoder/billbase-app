@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class QuoteService
 {
+    public function __construct(
+        protected QuotePdfService $quotePdfService,
+    ) {}
+
     public function index(User $user): JsonResponse
     {
         $quotes = Quote::where('organization_id', $user->organization_id)
@@ -170,6 +174,20 @@ class QuoteService
 
         if ($status === 'sent') {
             $timestamps['sent_at'] = now();
+
+            // Generate PDF and store to R2 on first send only
+            if (!$quote->pdf_path) {
+                try {
+                    $path = $this->quotePdfService->generateAndStore($quote);
+                    $timestamps['pdf_path']         = $path;
+                    $timestamps['pdf_generated_at'] = now();
+                } catch (\Throwable $e) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'Failed to generate PDF: ' . $e->getMessage(),
+                    ], 500);
+                }
+            }
         }
 
         $quote->update(array_merge(['status' => $status], $timestamps));

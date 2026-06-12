@@ -11,17 +11,17 @@ class PlanSeeder extends Seeder
     {
         $plans = [
             [
-                'name'       => 'Starter',
-                'slug'       => 'starter',
+                'name'       => 'Free',
+                'slug'       => 'free',
                 'price'      => 0.00,
                 'is_active'  => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name'       => 'Professional',
-                'slug'       => 'professional',
-                'price'      => 299.00,
+                'name'       => 'Pro',
+                'slug'       => 'pro',
+                'price'      => 70.00,
                 'is_active'  => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -29,7 +29,7 @@ class PlanSeeder extends Seeder
             [
                 'name'       => 'Enterprise',
                 'slug'       => 'enterprise',
-                'price'      => 799.00,
+                'price'      => 140.00,
                 'is_active'  => true,
                 'created_at' => now(),
                 'updated_at' => now(),

@@ -11,7 +11,7 @@
         }
 
         body {
-            font-family: 'dejavusans', sans-serif;
+            font-family: 'DejaVu Sans', sans-serif;
             font-size: 12px;
             color: #1a1a2e;
             line-height: 2;
@@ -491,6 +491,13 @@
     ══════════════════════════════════ --}}
     <div class="footer">
         {{ $prefs['invoice_footer'] }}
+
+        @if($invoice->organization->activeSubscription?->plan?->slug === 'free')
+            <br>
+            <span style="font-size: 14px; color: #cccccc;">
+                {{ $prefs['pdf_branding'] }}
+            </span>
+        @endif
     </div>
 
 </div>

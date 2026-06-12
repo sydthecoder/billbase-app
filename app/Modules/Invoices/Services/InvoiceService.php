@@ -249,6 +249,15 @@ class InvoiceService
                     ]);
             });
 
+            $path = $this->invoicePdfService->generateAndStore($invoice);
+
+            $invoice->update([
+                'sent_at'          => now(),
+                'status'           => 'sent',
+                'pdf_path'         => $path,
+                'pdf_generated_at' => now(),
+            ]);
+
             $invoice->update([
                 'sent_at' => now(),
                 'status'  => 'sent',

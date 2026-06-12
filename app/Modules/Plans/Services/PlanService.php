@@ -46,9 +46,9 @@ class PlanService
      * false means feature not available.
      *
      * Example:
-     *   $service->limit('starter', 'invoices_per_month') // 100
+     *   $service->limit('free', 'invoices_per_month') // 100
      *   $service->limit('enterprise', 'invoices_per_month') // null (unlimited)
-     *   $service->limit('starter', 'mail_settings') // false (not available)
+     *   $service->limit('free', 'mail_settings') // false (not available)
      */
     public function limit(string $slug, string $key): mixed
     {

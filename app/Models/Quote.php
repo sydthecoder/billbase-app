@@ -29,6 +29,8 @@ class Quote extends Model
         'viewed_at',
         'converted_at',
         'converted_to_invoice_id',
+        'pdf_path',
+        'pdf_generated_at',
     ];
 
     protected $casts = [
@@ -42,6 +44,7 @@ class Quote extends Model
         'discount_percent' => 'decimal:2',
         'tax_total'    => 'decimal:2',
         'total'        => 'decimal:2',
+        'pdf_generated_at' => 'datetime',
     ];
 
     // Statuses that are locked from editing

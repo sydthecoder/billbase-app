@@ -105,8 +105,6 @@ class Organization extends Model
 
     public function getLogoUrlAttribute(): ?string
     {
-        return $this->logo_filename
-            ? asset('storage/logos/' . $this->logo_filename)
-            : null;
+        return $this->logo_filename ?? null;
     }
 }

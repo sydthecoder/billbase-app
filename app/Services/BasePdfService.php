@@ -2,19 +2,20 @@
 
 namespace App\Services;
 
-use Mpdf\Mpdf;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Barryvdh\DomPDF\PDF as DomPDF;
 
 abstract class BasePdfService
 {
-    protected function createMpdf(): Mpdf
+    protected function createPdf(string $view, array $data): DomPDF
     {
-        return new Mpdf([
-            'format'        => 'A4',
-            'margin_top'    => 15,
-            'margin_bottom' => 15,
-            'margin_left'   => 15,
-            'margin_right'  => 15,
-            'default_font'  => 'dejavusans',
-        ]);
+        return Pdf::loadView($view, $data)
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'defaultFont'     => 'dejavu sans',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => false,
+                'dpi'             => 150,
+            ]);
     }
 }

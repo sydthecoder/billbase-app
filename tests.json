@@ -1,0 +1,686 @@
+{
+    "baseUrl": "http://localhost:8000/api",
+    "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    },
+    "tokens": {
+        "auth_token": "REPLACE_WITH_TOKEN_FROM_LOGIN"
+    },
+    "tests": {
+        "1_authentication": {
+        "register": {
+            "endpoint": "POST /v1/auth/register",
+            "description": "Register a new account and create organization",
+            "required_fields": [
+                "email",
+                "password"
+            ],
+            "optional_fields": [
+                "plan_slug"
+            ],
+            "body": {
+                "email": "admin@payflow-test.com",
+                "password": "SecurePassword123!",
+                "plan_slug": "free"
+            },
+            "response_note": "Returns user, organization, and api_token. Save token for subsequent requests."
+        },
+        "login": {
+            "endpoint": "POST /v1/auth/login",
+            "description": "Login with email and password",
+            "required_fields": [
+                "email",
+                "password"
+            ],
+            "body": {
+                "email": "admin@payflow-test.com",
+                "password": "SecurePassword123!"
+            },
+            "response_note": "Returns api_token. Use in Authorization: Bearer header for all subsequent requests"
+        },
+        "get_me": {
+            "endpoint": "GET /v1/auth/me",
+            "description": "Get current authenticated user",
+            "auth_required": true,
+            "response_note": "Returns current user details including organization_id"
+        },
+        "logout": {
+            "endpoint": "POST /v1/auth/logout",
+            "description": "Logout current user",
+            "auth_required": true,
+            "body": {}
+        }
+        },
+        "2_settings": {
+        "get_user_profile": {
+            "endpoint": "GET /v1/settings/profile",
+            "description": "Get current user profile",
+            "auth_required": true
+        },
+        "update_user_profile": {
+            "endpoint": "PUT /v1/settings/profile",
+            "description": "Update current user profile",
+            "auth_required": true,
+            "required_fields": [],
+            "optional_fields": [
+                "first_name",
+                "last_name",
+                "phone"
+            ],
+            "body": {
+                "first_name": "Admin",
+                "last_name": "User",
+                "phone": "0123456789"
+            }
+        },
+        "get_organization": {
+            "endpoint": "GET /v1/settings/organization",
+            "description": "Get organization profile",
+            "auth_required": true
+        },
+        "update_organization": {
+            "endpoint": "PUT /v1/settings/organization",
+            "description": "Update organization profile (owner/admin only)",
+            "auth_required": true,
+            "required_fields": [],
+            "optional_fields": [
+                "name",
+                "email",
+                "phone",
+                "reg_number",
+                "tax_number",
+                "street_address",
+                "suburb",
+                "city",
+                "province",
+                "postal_code",
+                "country",
+                "currency"
+            ],
+            "body": {
+                "name": "Test Company Inc",
+                "email": "company@payflow-test.com",
+                "phone": "0121234567",
+                "reg_number": "2024001234",
+                "tax_number": "4567890123",
+                "street_address": "123 Business Street",
+                "suburb": "Sandton",
+                "city": "Johannesburg",
+                "province": "gauteng",
+                "postal_code": "2196",
+                "country": "ZA",
+                "currency": "ZAR"
+            }
+        },
+        "save_bank_account": {
+            "endpoint": "POST /v1/settings/bank-account",
+            "description": "Save organization bank account details",
+            "auth_required": true,
+            "required_fields": [
+                "bank_name",
+                "account_holder",
+                "account_number",
+                "branch_code",
+                "account_type"
+            ],
+            "bank_name_options": [
+                "absa",
+                "fnb",
+                "standard_bank",
+                "nedbank",
+                "capitec",
+                "tymebank"
+            ],
+            "account_type_options": [
+                "cheque",
+                "savings",
+                "transmission"
+            ],
+            "body": {
+            "bank_name": "fnb",
+            "account_holder": "Test Company Inc",
+            "account_number": "1234567890",
+            "branch_code": "250355",
+            "account_type": "cheque"
+            }
+        },
+        "get_bank_account": {
+            "endpoint": "GET /v1/settings/bank-account",
+            "description": "Get organization bank account details",
+            "auth_required": true
+        },
+        "get_preferences": {
+            "endpoint": "GET /v1/settings/preferences",
+            "description": "Get organization preferences",
+            "auth_required": true
+        },
+        "update_preferences": {
+            "endpoint": "PUT /v1/settings/preferences",
+            "description": "Update organization preferences",
+            "auth_required": true,
+            "body": {
+                "currency": "ZAR",
+                "tax_rate": 15,
+                "invoice_prefix": "INV",
+                "quote_prefix": "QTE"
+            }
+        },
+        "get_mail_settings": {
+            "endpoint": "GET /v1/settings/mail/outgoing",
+            "description": "Get outgoing mail settings",
+            "auth_required": true
+        },
+        "save_mail_settings": {
+            "endpoint": "POST /v1/settings/mail/outgoing",
+            "description": "Save outgoing mail settings",
+            "auth_required": true,
+            "body": {
+                "mail_host": "smtp.gmail.com",
+                "mail_port": 587,
+                "mail_username": "your-email@gmail.com",
+                "mail_password": "your-app-password",
+                "mail_encryption": "tls",
+                "mail_from_address": "noreply@payflow-test.com",
+                "mail_from_name": "PayFlow"
+            }
+        }
+        },
+        "3_products_setup": {
+        "create_product_category": {
+            "endpoint": "POST /v1/products/categories",
+            "description": "Create a product category",
+            "auth_required": true,
+            "required_fields": [
+                "name"
+            ],
+            "optional_fields": [
+                "description"
+            ],
+            "body": [
+            {
+                "name": "Services",
+                "description": "Professional services"
+            },
+            {
+                "name": "Consulting",
+                "description": "Consulting hours"
+            },
+            {
+                "name": "Development",
+                "description": "Software development"
+            }
+            ]
+        },
+        "get_product_categories": {
+            "endpoint": "GET /v1/products/categories",
+            "description": "List all product categories",
+            "auth_required": true
+        },
+        "create_product": {
+            "endpoint": "POST /v1/products",
+            "description": "Create a product (use category ID from create_product_category response)",
+            "auth_required": true,
+            "required_fields": [
+            "name",
+            "price"
+            ],
+            "optional_fields": [
+                "product_category_id",
+                "description",
+                "unit",
+                "sku",
+                "is_taxable",
+                "status"
+            ],
+            "unit_options": [
+                "item",
+                "hour",
+                "day",
+                "month",
+                "kg",
+                "litre",
+                "metre"
+            ],
+            "body": [
+                {
+                    "product_category_id": "CATEGORY_ID_1",
+                    "name": "Consulting - Senior Consultant",
+                    "description": "Senior consultant hourly rate",
+                    "price": 250.00,
+                    "unit": "hour",
+                    "sku": "CONS-SC-001",
+                    "is_taxable": true,
+                    "status": "active"
+                },
+                {
+                    "product_category_id": "CATEGORY_ID_2",
+                    "name": "Development - Custom Development",
+                    "description": "Custom software development",
+                    "price": 150.00,
+                    "unit": "hour",
+                    "sku": "DEV-CD-001",
+                    "is_taxable": true,
+                    "status": "active"
+                },
+                {
+                    "product_category_id": "CATEGORY_ID_1",
+                    "name": "Project Management",
+                    "description": "Monthly project management fee",
+                    "price": 5000.00,
+                    "unit": "month",
+                    "sku": "PM-MTH-001",
+                    "is_taxable": true,
+                    "status": "active"
+                }
+            ]
+        },
+        "get_products": {
+            "endpoint": "GET /v1/products",
+            "description": "List all products",
+            "auth_required": true
+        }
+        },
+        "4_customers": {
+        "create_customer": {
+            "endpoint": "POST /v1/customers",
+            "description": "Create a customer",
+            "auth_required": true,
+            "required_fields": [
+                "first_name",
+                "last_name",
+                "email"
+            ],
+            "optional_fields": [
+                "company_name",
+                "company_reg_number",
+                "vat_number",
+                "phone",
+                "street_address",
+                "suburb",
+                "city",
+                "province",
+                "postal_code",
+                "notes",
+                "status"
+            ],
+            "province_options": [
+                "gauteng",
+                "western_cape",
+                "eastern_cape",
+                "kwazulu_natal",
+                "limpopo",
+                "mpumalanga",
+                "north_west",
+                "northern_cape",
+                "free_state"
+            ],
+            "status_options": [
+                "active",
+                "inactive"
+            ],
+            "body": [
+            {
+                "first_name": "John",
+                "last_name": "Smith",
+                "email": "john.smith@acmecorp.com",
+                "company_name": "ACME Corporation",
+                "company_reg_number": "2023001234",
+                "vat_number": "4567890123",
+                "phone": "0121234567",
+                "street_address": "456 Corporate Avenue",
+                "suburb": "Sandton",
+                "city": "Johannesburg",
+                "province": "gauteng",
+                "postal_code": "2196",
+                "notes": "Key client - VIP treatment",
+                "status": "active"
+            },
+            {
+                "first_name": "Sarah",
+                "last_name": "Johnson",
+                "email": "sarah.johnson@techstartup.io",
+                "company_name": "Tech Startup Inc",
+                "company_reg_number": "2024005678",
+                "vat_number": "9876543210",
+                "phone": "0879876543",
+                "street_address": "789 Innovation Drive",
+                "suburb": "Rosebank",
+                "city": "Johannesburg",
+                "province": "gauteng",
+                "postal_code": "2194",
+                "notes": "Startup client - flexible terms",
+                "status": "active"
+            },
+            {
+                "first_name": "Mike",
+                "last_name": "Wilson",
+                "email": "mike@smallbiz.co.za",
+                "company_name": "Small Business Ltd",
+                "phone": "0831234567",
+                "street_address": "321 Main Street",
+                "city": "Cape Town",
+                "province": "western_cape",
+                "postal_code": "8001",
+                "status": "active"
+            }
+            ]
+        },
+        "get_customers": {
+            "endpoint": "GET /v1/customers",
+            "description": "List all customers",
+            "auth_required": true
+        },
+        "get_customer_by_id": {
+            "endpoint": "GET /v1/customers/{id}",
+            "description": "Get specific customer (use customer ID from create response)",
+            "auth_required": true
+        }
+        },
+        "5_quotes": {
+        "create_quote": {
+            "endpoint": "POST /v1/quotes",
+            "description": "Create a quote (use customer ID and product IDs from previous steps)",
+            "auth_required": true,
+            "required_fields": [
+                "customer_id",
+                "issue_date",
+                "expires_at",
+                "items"
+            ],
+            "optional_fields": [
+                "title",
+                "discount_amount",
+                "discount_percent",
+                "notes",
+                "footer"
+            ],
+            "items_required": [
+                "description",
+                "quantity",
+                "unit_price",
+                "is_taxable"
+            ],
+            "items_optional": [
+                "product_id",
+                "unit",
+                "discount_amount",
+                "sort_order"
+            ],
+            "body": {
+            "customer_id": "CUSTOMER_ID_1",
+            "title": "Website Redesign Project",
+            "issue_date": "2024-06-12",
+            "expires_at": "2024-07-12",
+            "discount_percent": 5,
+            "notes": "Thank you for your business!",
+            "footer": "Quote valid for 30 days",
+            "items": [
+                {
+                "product_id": "PRODUCT_ID_2",
+                "description": "Custom website development - 80 hours",
+                "quantity": 80,
+                "unit": "hour",
+                "unit_price": 150.00,
+                "is_taxable": true,
+                "discount_amount": 0,
+                "sort_order": 1
+                },
+                {
+                "description": "WordPress theme customization",
+                "quantity": 1,
+                "unit": "item",
+                "unit_price": 5000.00,
+                "is_taxable": true,
+                "sort_order": 2
+                },
+                {
+                "product_id": "PRODUCT_ID_1",
+                "description": "Project management",
+                "quantity": 2,
+                "unit": "month",
+                "unit_price": 5000.00,
+                "is_taxable": true,
+                "sort_order": 3
+                }
+            ]
+            }
+        },
+        "get_quotes": {
+            "endpoint": "GET /v1/quotes",
+            "description": "List all quotes",
+            "auth_required": true
+        },
+        "get_quote_by_id": {
+            "endpoint": "GET /v1/quotes/{id}",
+            "description": "Get specific quote",
+            "auth_required": true
+        },
+        "update_quote_status": {
+            "endpoint": "PATCH /v1/quotes/{id}/status",
+            "description": "Update quote status (use quote ID from create response)",
+            "auth_required": true,
+            "status_options": [
+                "draft",
+                "sent",
+                "viewed",
+                "accepted",
+                "declined",
+                "expired",
+                "converted"
+            ],
+            "body": {
+                "status": "sent"
+            }
+        },
+        "get_quote_pdf": {
+            "endpoint": "GET /v1/quotes/{id}/pdf",
+            "description": "Get quote PDF (returns PDF data)",
+            "auth_required": true
+        }
+        },
+        "6_invoices": {
+        "create_invoice": {
+            "endpoint": "POST /v1/invoices",
+            "description": "Create an invoice (can reference quote_id or create standalone)",
+            "auth_required": true,
+            "required_fields": [
+                "customer_id",
+                "issue_date",
+                "due_date",
+                "items"
+            ],
+            "optional_fields": [
+                "quote_id",
+                "discount_amount",
+                "discount_percent",
+                "notes",
+                "footer"
+            ],
+            "items_required": [
+                "description",
+                "quantity",
+                "unit_price",
+                "is_taxable"
+            ],
+            "items_optional": [
+                "product_id",
+                "unit",
+                "discount_amount",
+                "sort_order"
+            ],
+            "body": {
+                "customer_id": "CUSTOMER_ID_1",
+                "quote_id": "QUOTE_ID_1",
+                "issue_date": "2024-06-12",
+                "due_date": "2024-07-12",
+                "discount_amount": 0,
+                "notes": "Thank you for your business!",
+                "footer": "Payment terms: Net 30",
+                "items": [
+                    {
+                        "product_id": "PRODUCT_ID_2",
+                        "description": "Custom website development - 80 hours",
+                        "quantity": 80,
+                        "unit": "hour",
+                        "unit_price": 150.00,
+                        "is_taxable": true,
+                        "discount_amount": 0,
+                        "sort_order": 1
+                    },
+                    {
+                        "description": "WordPress theme customization",
+                        "quantity": 1,
+                        "unit": "item",
+                        "unit_price": 5000.00,
+                        "is_taxable": true,
+                        "sort_order": 2
+                    },
+                    {
+                        "product_id": "PRODUCT_ID_1",
+                        "description": "Project management",
+                        "quantity": 2,
+                        "unit": "month",
+                        "unit_price": 5000.00,
+                        "is_taxable": true,
+                        "sort_order": 3
+                    }
+                ]
+            }
+        },
+        "get_invoices": {
+            "endpoint": "GET /v1/invoices",
+            "description": "List all invoices",
+            "auth_required": true
+        },
+        "get_invoice_by_id": {
+            "endpoint": "GET /v1/invoices/{id}",
+            "description": "Get specific invoice",
+            "auth_required": true
+        },
+        "send_invoice": {
+            "endpoint": "POST /v1/invoices/{id}/send",
+            "description": "Send invoice to customer email",
+            "auth_required": true,
+            "body": {}
+        },
+        "get_invoice_pdf": {
+            "endpoint": "GET /v1/invoices/{id}/pdf",
+            "description": "Get invoice PDF (returns PDF data)",
+            "auth_required": true,
+            "note": "Throttled to 10 requests per minute"
+        }
+        },
+        "7_payments": {
+        "create_payment": {
+            "endpoint": "POST /v1/invoices/{invoiceId}/payments",
+            "description": "Record a payment against an invoice",
+            "auth_required": true,
+            "required_fields": [
+                "payment_method",
+                "amount",
+                "paid_at"
+            ],
+            "optional_fields": [
+                "notes"
+            ],
+            "payment_method_options": [
+                "eft",
+                "cash",
+                "other"
+            ],
+            "body": {
+            "payment_method": "eft",
+            "amount": 20000.00,
+            "paid_at": "2024-06-15",
+            "notes": "EFT reference: ACME-20240615"
+            }
+        },
+        "get_invoice_payments": {
+            "endpoint": "GET /v1/invoices/{invoiceId}/payments",
+            "description": "List all payments for an invoice",
+            "auth_required": true
+        }
+        },
+        "8_lookup_data": {
+        "get_plans": {
+            "endpoint": "GET /v1/plans",
+            "description": "Get available plans (no auth required)",
+            "auth_required": false
+        }
+        }
+    },
+    "usage_notes": {
+        "general": [
+            "1. Start with Register to create your account",
+            "2. Login to get auth token",
+            "3. Update organization profile and settings",
+            "4. Create product categories",
+            "5. Create products",
+            "6. Create customers",
+            "7. Create quotes",
+            "8. Convert quote to invoice or create standalone invoice",
+            "9. Record payments against invoices"
+        ],
+        "authorization": [
+            "Add header: Authorization: Bearer {api_token}",
+            "Get token from login or register response"
+        ],
+        "placeholders": {
+            "CATEGORY_ID_1": "Replace with category ID from create_product_category response",
+            "CATEGORY_ID_2": "Replace with second category ID",
+            "PRODUCT_ID_1": "Replace with product ID from create_product response",
+            "PRODUCT_ID_2": "Replace with second product ID",
+            "CUSTOMER_ID_1": "Replace with customer ID from create_customer response",
+            "QUOTE_ID_1": "Replace with quote ID from create_quote response"
+        },
+        "date_format": "YYYY-MM-DD (ISO 8601)",
+        "decimal_fields": "price, amount, tax_rate etc should use max 2 decimal places",
+        "status_transitions": {
+        "quote": {
+            "draft": [
+                "sent",
+                "deleted"
+            ],
+            "sent": [
+                "viewed",
+                "accepted",
+                "declined"
+            ],
+            "viewed": [
+                "accepted",
+                "declined"
+            ],
+            "accepted": [
+                "converted"
+            ],
+            "declined": [
+                "draft"
+            ],
+            "converted": "locked - cannot be edited",
+            "expired": "locked - cannot be edited"
+        },
+        "invoice": {
+            "draft": [
+                "sent",
+                "deleted"
+            ],
+            "sent": [
+                "viewed",
+                "partial",
+                "paid"
+            ],
+            "viewed": [
+                "partial",
+                "paid"
+            ],
+            "partial": [
+                "paid"
+            ],
+            "paid": "locked - cannot be edited"
+        }
+        },
+        "pagination": "Use query parameters: ?page=1&per_page=15",
+        "filtering": "Refer to API documentation for available filter parameters"
+    }
+}

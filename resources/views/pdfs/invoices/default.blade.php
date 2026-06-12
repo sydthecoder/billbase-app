@@ -350,13 +350,15 @@
     </div>
     @endif
 
-    {{-- FOOTER --}}
     <div class="footer">
         {{ $prefs['invoice_footer'] }}
-    </div>
-    <div class="sars-notice">
-        This is a tax invoice for VAT purposes.
-    </div>
 
+        @if($invoice->organization->activeSubscription?->plan?->slug === 'free')
+            <br>
+            <span style="font-size: 14px; color: #cccccc;">
+                {{ $prefs['pdf_branding'] }}
+            </span>
+        @endif
+    </div>
 </body>
 </html>

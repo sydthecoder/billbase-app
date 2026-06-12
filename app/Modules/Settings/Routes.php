@@ -15,6 +15,7 @@ Route::prefix('v1/settings')->middleware('auth:sanctum')->group(function () {
     // Organization profile — owner and admin only
     Route::get('organization',  [SettingsController::class, 'getOrganization']);
     Route::put('organization',  [SettingsController::class, 'updateOrganization']);
+    Route::post('organization/logo', [SettingsController::class, 'uploadLogo']);
 
     // Mail settings
     Route::get('mail/outgoing',       [MailSettingsController::class, 'get']);

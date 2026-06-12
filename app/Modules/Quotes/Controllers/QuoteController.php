@@ -53,10 +53,14 @@ class QuoteController extends Controller
         return $this->quoteService->updateStatus(auth()->user(), $id, $request->status);
     }
 
-    public function pdf(int $id): \Illuminate\Http\Response
+    public function pdf(int $id): mixed
     {
         $quote = Quote::where('organization_id', auth()->user()->organization_id)
             ->findOrFail($id);
+
+        if ($quote->pdf_path) {
+            return redirect($this->quotePdfService->presignedUrl($quote->pdf_path));
+        }
 
         $pdf = $this->quotePdfService->generate($quote);
 
@@ -65,10 +69,14 @@ class QuoteController extends Controller
             ->header('Content-Disposition', 'inline; filename="' . $quote->quote_number . '.pdf"');
     }
 
-    public function pdfDownload(int $id): \Illuminate\Http\Response
+    public function pdfDownload(int $id): mixed
     {
         $quote = Quote::where('organization_id', auth()->user()->organization_id)
             ->findOrFail($id);
+
+        if ($quote->pdf_path) {
+            return redirect($this->quotePdfService->presignedUrl($quote->pdf_path, true));
+        }
 
         $pdf = $this->quotePdfService->generate($quote);
 

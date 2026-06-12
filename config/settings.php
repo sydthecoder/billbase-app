@@ -87,6 +87,7 @@ return [
         // Primary brand color shown on invoice PDFs and customer portal
         // Must be a valid hex color code
         'brand_color' => '#0F766E',
+        'pdf_branding'=> 'Powered By Bill Base.'
 
     ],
 

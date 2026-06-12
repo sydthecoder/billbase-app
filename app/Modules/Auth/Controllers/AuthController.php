@@ -24,9 +24,9 @@ class AuthController extends Controller
         DB::beginTransaction();
 
         try {
-            // Resolve plan — default to starter if none provided
-            $slug = $request->plan_slug ?? 'starter';
-            $plan = Plan::where('slug', $slug)->where('is_active', true)->firstOrFail();
+            // Resolve plan — default to free if none provided
+            $slug = $request->plan_slug ?? 'free';
+            $plan = Plan::where('slug', $slug)->where('is_active', true)->first();
 
             // Create organization — name defaults to "Bill Base" so it's never null.
             // Users are nudged to update this in Settings after registration.

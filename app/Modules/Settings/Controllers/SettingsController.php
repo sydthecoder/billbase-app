@@ -37,4 +37,16 @@ class SettingsController extends Controller
     {
         return $this->OrganizationProfileService->update(auth()->user(), $request->validated());
     }
+
+    public function uploadLogo(\Illuminate\Http\Request $request): JsonResponse
+    {
+        $request->validate([
+            'logo' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        return $this->OrganizationProfileService->uploadLogo(
+            auth()->user(),
+            $request->file('logo')
+        );
+    }
 }
