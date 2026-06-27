@@ -5,9 +5,8 @@ namespace App\Modules\Customers\Services;
 use App\Models\Customer;
 use App\Models\User;
 use App\Services\PlanGate;
-use App\Modules\Customers\Resources\CustomerResource;
 use App\Services\CodeGeneratorService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Database\Eloquent\Collection;
 
 class CustomerService
 {
@@ -15,40 +14,33 @@ class CustomerService
         protected PlanGate $planGate = new PlanGate,
     ) {}
 
-    public function index(User $user): JsonResponse
+    public function index(User $user): Collection
     {
-        $customers = Customer::where('organization_id', $user->organization_id)
+        return Customer::where('organization_id', $user->organization_id)
             ->orderBy('created_at', 'desc')
             ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => CustomerResource::collection($customers),
-        ]);
     }
 
-    public function store(User $user, array $data): JsonResponse
+    public function store(User $user, array $data): array
     {
         $currentCount = Customer::where('organization_id', $user->organization_id)->count();
-        
+
         if (! $this->planGate->allows($user, 'customers', $currentCount)) {
-            return response()->json([
+            return [
                 'status'  => 'limit_reached',
                 'message' => "You've reached the customer limit for the {$this->planGate->getPlanName($user)} plan. Upgrade to add more.",
-                'plan'    => $this->planGate->getPlanName($user),
-            ], 403);
+            ];
         }
-        
-        // Check email unique per org
+
         $exists = Customer::where('organization_id', $user->organization_id)
             ->where('email', $data['email'])
             ->exists();
 
         if ($exists) {
-            return response()->json([
+            return [
                 'status'  => 'error',
                 'message' => 'A customer with this email already exists.',
-            ], 422);
+            ];
         }
 
         $customer = Customer::create([
@@ -57,30 +49,23 @@ class CustomerService
             'customer_code'   => CodeGeneratorService::customer($user->organization_id),
         ]);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Customer created.',
-            'data'    => new CustomerResource($customer),
-        ], 201);
+        return [
+            'status'   => 'success',
+            'customer' => $customer,
+        ];
     }
 
-    public function show(User $user, int $id): JsonResponse
+    public function show(User $user, int $id): Customer
+    {
+        return Customer::where('organization_id', $user->organization_id)
+            ->findOrFail($id);
+    }
+
+    public function update(User $user, int $id, array $data): array
     {
         $customer = Customer::where('organization_id', $user->organization_id)
             ->findOrFail($id);
 
-        return response()->json([
-            'status' => 'success',
-            'data'   => new CustomerResource($customer),
-        ]);
-    }
-
-    public function update(User $user, int $id, array $data): JsonResponse
-    {
-        $customer = Customer::where('organization_id', $user->organization_id)
-            ->findOrFail($id);
-
-        // Check email unique per org excluding current
         if (isset($data['email'])) {
             $exists = Customer::where('organization_id', $user->organization_id)
                 ->where('email', $data['email'])
@@ -88,32 +73,25 @@ class CustomerService
                 ->exists();
 
             if ($exists) {
-                return response()->json([
+                return [
                     'status'  => 'error',
                     'message' => 'A customer with this email already exists.',
-                ], 422);
+                ];
             }
         }
 
         $customer->update($data);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Customer updated.',
-            'data'    => new CustomerResource($customer->fresh()),
-        ]);
+        return [
+            'status'   => 'success',
+            'customer' => $customer->fresh(),
+        ];
     }
 
-    public function destroy(User $user, int $id): JsonResponse
+    public function destroy(User $user, int $id): void
     {
-        $customer = Customer::where('organization_id', $user->organization_id)
-            ->findOrFail($id);
-
-        $customer->delete();
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Customer deleted.',
-        ]);
+        Customer::where('organization_id', $user->organization_id)
+            ->findOrFail($id)
+            ->delete();
     }
 }

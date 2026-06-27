@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Modules\Customers\Requests\CreateCustomerRequest;
 use App\Modules\Customers\Requests\UpdateCustomerRequest;
 use App\Modules\Customers\Services\CustomerService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class CustomerController extends Controller
 {
@@ -14,28 +15,62 @@ class CustomerController extends Controller
         protected CustomerService $customerService,
     ) {}
 
-    public function index(): JsonResponse
+    public function index(): View
     {
-        return $this->customerService->index(auth()->user());
+        $customers = $this->customerService->index(auth()->user());
+
+        return view('customers.index', compact('customers'));
     }
 
-    public function store(CreateCustomerRequest $request): JsonResponse
+    public function create(): View
     {
-        return $this->customerService->store(auth()->user(), $request->validated());
+        return view('customers.create');
     }
 
-    public function show(int $id): JsonResponse
+    public function store(CreateCustomerRequest $request): RedirectResponse
     {
-        return $this->customerService->show(auth()->user(), $id);
+        $result = $this->customerService->store(auth()->user(), $request->validated());
+
+        if ($result['status'] === 'limit_reached') {
+            return back()->withErrors(['limit' => $result['message']])->withInput();
+        }
+
+        if ($result['status'] === 'error') {
+            return back()->withErrors(['email' => $result['message']])->withInput();
+        }
+
+        return redirect()->route('customers.index')->with('success', 'Customer created.');
     }
 
-    public function update(UpdateCustomerRequest $request, int $id): JsonResponse
+    public function show(int $id): View
     {
-        return $this->customerService->update(auth()->user(), $id, $request->validated());
+        $customer = $this->customerService->show(auth()->user(), $id);
+
+        return view('customers.show', compact('customer'));
     }
 
-    public function destroy(int $id): JsonResponse
+    public function edit(int $id): View
     {
-        return $this->customerService->destroy(auth()->user(), $id);
+        $customer = $this->customerService->show(auth()->user(), $id);
+
+        return view('customers.edit', compact('customer'));
+    }
+
+    public function update(UpdateCustomerRequest $request, int $id): RedirectResponse
+    {
+        $result = $this->customerService->update(auth()->user(), $id, $request->validated());
+
+        if ($result['status'] === 'error') {
+            return back()->withErrors(['email' => $result['message']])->withInput();
+        }
+
+        return redirect()->route('customers.show', $id)->with('success', 'Customer updated.');
+    }
+
+    public function destroy(int $id): RedirectResponse
+    {
+        $this->customerService->destroy(auth()->user(), $id);
+
+        return redirect()->route('customers.index')->with('success', 'Customer deleted.');
     }
 }

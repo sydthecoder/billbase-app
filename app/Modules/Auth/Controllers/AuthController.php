@@ -9,27 +9,33 @@ use App\Models\Plan;
 use App\Models\User;
 use App\Modules\Auth\Requests\LoginRequest;
 use App\Modules\Auth\Requests\RegisterRequest;
-use App\Modules\Auth\Resources\UserResource;
 use App\Services\CodeGeneratorService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Cookie;
-use Symfony\Component\HttpFoundation\Cookie as SymfonyCookie;
+use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request): JsonResponse
+    public function showLogin(): View
+    {
+        return view('auth.login');
+    }
+
+    public function showRegister(): View
+    {
+        return view('auth.register');
+    }
+
+    public function register(RegisterRequest $request): RedirectResponse
     {
         DB::beginTransaction();
 
         try {
-            // Resolve plan — default to free if none provided
             $slug = $request->plan_slug ?? 'free';
             $plan = Plan::where('slug', $slug)->where('is_active', true)->first();
 
-            // Create organization — name defaults to "Bill Base" so it's never null.
-            // Users are nudged to update this in Settings after registration.
             $organization = Organization::create([
                 'name'     => 'Bill Base',
                 'org_code' => CodeGeneratorService::organization(),
@@ -56,96 +62,47 @@ class AuthController extends Controller
 
             DB::commit();
 
-            $token = $user->createToken('auth_token')->plainTextToken;
+            Auth::login($user);
+            $request->session()->regenerate();
 
-            $user->load('organization.activeSubscription.plan');
-
-            return response()->json([
-                'status' => 'success',
-                'data'   => [
-                    'access_token' => $token,
-                    'token_type'   => 'Bearer',
-                    'user'         => new UserResource($user),
-                ],
-            ], 201)->cookie($this->authCookie($token));
+            return redirect()->route('dashboard');
 
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Registration failed. Please try again.',
-            ], 500);
+            return back()->withErrors([
+                'general' => $e->getMessage(),
+            ])->withInput();
         }
     }
 
-    public function login(LoginRequest $request): JsonResponse
+    public function login(LoginRequest $request): RedirectResponse
     {
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Invalid credentials.',
-            ], 401);
+            return back()->withErrors([
+                'email' => 'Invalid credentials.',
+            ])->withInput($request->only('email'));
         }
-
-        // Revoke previous tokens — one active session at a time
-        $user->tokens()->delete();
 
         $user->update(['last_login_at' => now()]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        Auth::login($user);
+        $request->session()->regenerate();
 
         $user->load('organization.activeSubscription.plan');
 
-        return response()->json([
-            'status' => 'success',
-            'data'   => [
-                'access_token' => $token,
-                'token_type'   => 'Bearer',
-                'user'         => new UserResource($user),
-            ],
-        ], 200)->cookie($this->authCookie($token));
+        return redirect()->intended(route('dashboard'));
     }
 
-    public function logout(): JsonResponse
+    public function logout(): RedirectResponse
     {
-        auth()->user()->currentAccessToken()?->delete();
+        Auth::logout();
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Logged out.',
-        ], 200)->cookie(Cookie::forget('auth_token'));
-    }
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
 
-    public function me(): JsonResponse
-    {
-        $user = auth()->user()->load('organization.activeSubscription.plan');
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => [
-                'user' => new UserResource($user),
-            ],
-        ], 200);
-    }
-
-    private function authCookie(string $token): SymfonyCookie
-    {
-        $secure   = (bool) config('session.secure', app()->environment('production'));
-        $sameSite = config('session.same_site', 'lax') ?: 'lax';
-
-        return cookie(
-            'auth_token',
-            $token,
-            (int) config('session.lifetime', 120),
-            '/',
-            config('session.domain'),
-            $secure,
-            true,
-            false,
-            $sameSite
-        );
+        return redirect()->route('login');
     }
 }

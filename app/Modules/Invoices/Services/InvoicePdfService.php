@@ -11,12 +11,11 @@ class InvoicePdfService extends BasePdfService
 {
     public function generate(Invoice $invoice): string
     {
-        $invoice->load([
+        $invoice->loadMissing([
             'customer',
             'items',
             'organization',
             'organization.bankAccount',
-            'organization.activeSubscription.plan',
             'createdBy',
             'payments',
         ]);
@@ -24,16 +23,27 @@ class InvoicePdfService extends BasePdfService
         $prefs = OrganizationPreference::where('organization_id', $invoice->organization_id)->first();
 
         $resolvedPrefs = [
-            'brand_color'      => $prefs?->brand_color      ?? config('settings.organization_preferences.brand_color'),
-            'invoice_footer'   => $prefs?->invoice_footer   ?? config('settings.organization_preferences.invoice_footer'),
-            'pdf_branding'   => $prefs?->pdf_branding       ?? config('settings.organization_preferences.pdf_branding'),
-            'invoice_template' => $prefs?->invoice_template ?? config('settings.organization_preferences.invoice_template'),
+            'brand_color'      => $prefs?->brand_color    ?? config('settings.organization_preferences.brand_color'),
+            'invoice_footer'   => $prefs?->invoice_footer ?? config('settings.organization_preferences.invoice_footer'),
+            'invoice_template' => $prefs?->invoice_template ?? config('settings.organization_preferences.invoice_template', 'default'),
+            'pdf_branding'     => config('settings.organization_preferences.pdf_branding', 'Powered by BillBase'),
         ];
+        
+        $logoBase64 = null;
+        if ($invoice->organization->logo_url) {
+            $logoPath = storage_path('app/public/' . $invoice->organization->logo_url);
+            if (file_exists($logoPath)) {
+                $extension   = pathinfo($logoPath, PATHINFO_EXTENSION);
+                $mimeType    = 'image/' . ($extension === 'jpg' ? 'jpeg' : $extension);
+                $logoBase64  = 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($logoPath));
+            }
+        }
 
         return $this->createPdf("pdfs.invoices.{$resolvedPrefs['invoice_template']}", [
-            'invoice' => $invoice,
-            'prefs'   => $resolvedPrefs,
-            'tax'     => config('settings.tax'),
+            'invoice'     => $invoice,
+            'prefs'       => $resolvedPrefs,
+            'tax'         => config('settings.tax'),
+            'logoBase64'  => $logoBase64,
         ])->output();
     }
 
@@ -42,21 +52,8 @@ class InvoicePdfService extends BasePdfService
         $pdfContent = $this->generate($invoice);
         $path       = "invoices/{$invoice->organization->org_code}/{$invoice->invoice_number}.pdf";
 
-        Storage::disk('r2')->put($path, $pdfContent, 'private');
+        Storage::disk('public')->put($path, $pdfContent);
 
         return $path;
-    }
-
-    public function presignedUrl(string $path, bool $download = false): string
-    {
-        $filename = basename($path);
-
-        return Storage::disk('r2')->temporaryUrl(
-            $path,
-            now()->addMinutes(10),
-            $download ? [
-                'ResponseContentDisposition' => "attachment; filename=\"{$filename}\"",
-            ] : []
-        );
     }
 }

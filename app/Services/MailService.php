@@ -131,4 +131,61 @@ class MailService
             );
         }
     }
+
+    /**
+     * Send a system email with PDF attachment via Brevo.
+     * Used as fallback when tenant has no configured mail settings.
+     */
+    public static function sendWithAttachment(
+        string $to,
+        string $name,
+        string $subject,
+        string $view,
+        array  $data        = [],
+        array  $attachments = [],
+    ): bool {
+        $htmlContent = view($view, array_merge($data, ['subject' => $subject]))->render();
+
+        $payload = [
+            'sender' => [
+                'email' => config('services.brevo.sender_email'),
+                'name'  => config('services.brevo.sender_name'),
+            ],
+            'to'          => [['email' => $to, 'name' => $name]],
+            'subject'     => $subject,
+            'htmlContent' => $htmlContent,
+            'attachment'  => array_map(fn($a) => [
+                'content' => base64_encode($a['data']),
+                'name'    => $a['name'],
+            ], $attachments),
+        ];
+
+        try {
+            $response = Http::withHeaders([
+                'api-key'      => config('services.brevo.key'),
+                'Content-Type' => 'application/json',
+            ])->post(config('services.brevo.endpoint'), $payload);
+
+            if ($response->successful()) {
+                Log::info("MailService: sent [{$subject}] with attachment to [{$to}]");
+                return true;
+            }
+
+            Log::error("MailService: Brevo rejected email to [{$to}]", [
+                'subject'  => $subject,
+                'status'   => $response->status(),
+                'response' => $response->json(),
+            ]);
+
+            return false;
+
+        } catch (\Throwable $e) {
+            Log::error("MailService: exception sending to [{$to}]", [
+                'subject' => $subject,
+                'error'   => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
 }

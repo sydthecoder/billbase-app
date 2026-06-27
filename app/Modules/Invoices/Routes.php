@@ -3,19 +3,14 @@
 use App\Modules\Invoices\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
-/**
- * Default throttle (60/min per user) applied to all routes.
- * PDF endpoints further restricted to 10/min.
- */
-Route::prefix('v1/invoices')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
-    Route::get('/',           [InvoiceController::class, 'index']);
-    Route::post('/',          [InvoiceController::class, 'store']);
-    Route::get('/{id}',       [InvoiceController::class, 'show']);
-    Route::put('/{id}',       [InvoiceController::class, 'update']);
-    Route::post('/{id}/send', [InvoiceController::class, 'send']);
-    Route::delete('/{id}',    [InvoiceController::class, 'destroy']);
-
-    // PDF generation — heavier operation, stricter limit
-    Route::get('/{id}/pdf',   [InvoiceController::class, 'pdf'])
-        ->middleware('throttle:10,1');
+Route::middleware(['web', 'auth'])->prefix('invoices')->group(function () {
+    Route::get('/',            [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/create',      [InvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('/',           [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('/{id}',        [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/{id}/edit',   [InvoiceController::class, 'edit'])->name('invoices.edit');
+    Route::put('/{id}',        [InvoiceController::class, 'update'])->name('invoices.update');
+    Route::delete('/{id}',     [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    Route::post('/{id}/send',  [InvoiceController::class, 'send'])->name('invoices.send');
+    Route::get('/{id}/pdf',    [InvoiceController::class, 'pdf'])->name('invoices.pdf');
 });

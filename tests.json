@@ -198,18 +198,18 @@
                 "description"
             ],
             "body": [
-            {
-                "name": "Services",
-                "description": "Professional services"
-            },
-            {
-                "name": "Consulting",
-                "description": "Consulting hours"
-            },
-            {
-                "name": "Development",
-                "description": "Software development"
-            }
+                {
+                    "name": "Services",
+                    "description": "Professional services"
+                },
+                {
+                    "name": "Consulting",
+                    "description": "Consulting hours"
+                },
+                {
+                    "name": "Development",
+                    "description": "Software development"
+                }
             ]
         },
         "get_product_categories": {
@@ -222,8 +222,8 @@
             "description": "Create a product (use category ID from create_product_category response)",
             "auth_required": true,
             "required_fields": [
-            "name",
-            "price"
+                "name",
+                "price"
             ],
             "optional_fields": [
                 "product_category_id",

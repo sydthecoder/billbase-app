@@ -9,59 +9,54 @@ use Illuminate\Support\Facades\RateLimiter;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
+        web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         /**
-         * If no token stop redirect to default laravel login web route
-         * Instead throw 401 error
+         * Unauthenticated users are redirected to login
          */
-        $middleware->redirectGuestsTo(fn (Request $request) => null);
-
-        $middleware->append([
-            \Illuminate\Http\Middleware\HandleCors::class,
-            \App\Http\Middleware\AttachAuthTokenFromCookie::class,
-        ]);
+        $middleware->redirectGuestsTo(fn (Request $request) => route('login'));
     })
-
     ->withExceptions(function (Exceptions $exceptions): void {
         /**
-         * Default rate limitting across most generic routes
+         * Rate limiting — JSON for API routes, redirect with flash for web
          */
-        $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, $request) {
+        $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, Request $request) {
             $seconds = (int) $e->getHeaders()['Retry-After'];
-            
-            if ($seconds >= 60) {
-                $minutes = ceil($seconds / 60);
-                $message = "Too many attempts. Please try again in {$minutes} minute(s).";
-            } else {
-                $message = "Too many attempts. Please try again in {$seconds} second(s).";
+            $minutes = ceil($seconds / 60);
+            $message = $seconds >= 60
+                ? "Too many attempts. Please try again in {$minutes} minute(s)."
+                : "Too many attempts. Please try again in {$seconds} second(s).";
+
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'error', 'message' => $message], 429);
             }
 
-            return response()->json([
-                'status'  => 'error',
-                'message' => $message,
-            ], 429);
+            return back()->withErrors(['throttle' => $message]);
         });
 
         /**
-         * Returns 422 and its specific errors instead of redirecting and throwing 404
+         * Validation errors — JSON for API routes, redirect with errors for web
          */
         $exceptions->render(function (\Illuminate\Validation\ValidationException $e, Request $request) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Validation failed.',
-                'errors'  => $e->errors(),
-            ], 422);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Validation failed.',
+                    'errors'  => $e->errors(),
+                ], 422);
+            }
+
+            return back()->withErrors($e->errors())->withInput();
         });
     })
-    
-    /**
-     * Apply the rate limitting
-     */
     ->booted(function () {
+        /**
+         * Rate limiting — API routes only
+         */
         RateLimiter::for('api', function ($request) {
             return Limit::perMinute(60)->by(
                 $request->user()?->id ?: $request->ip()

@@ -167,8 +167,19 @@
     <div class="header">
         <div class="header-left">
             <div class="company-name">
-                {{ $invoice->organization->name ?? $invoice->organization->org_code }}
+                @if($logoBase64)
+                    <img 
+                        src="{{ $logoBase64 }}"
+                        alt="{{ $invoice->organization->name }}"
+                        style="max-height: 60px; max-width: 200px; margin-bottom: 10px;"
+                    />
+                @else
+                    <div class="company-name">
+                        {{ $invoice->organization->name ?? $invoice->organization->org_code }}
+                    </div>
+                @endif
             </div>
+            
             <div class="company-details">
                 @if($invoice->organization->email)
                     {{ $invoice->organization->email }}<br>

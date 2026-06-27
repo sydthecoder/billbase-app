@@ -5,7 +5,7 @@ namespace App\Modules\Settings\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Settings\Requests\SaveBankAccountRequest;
 use App\Modules\Settings\Services\BankAccountService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class BankAccountController extends Controller
 {
@@ -13,13 +13,10 @@ class BankAccountController extends Controller
         protected BankAccountService $bankAccountService,
     ) {}
 
-    public function get(): JsonResponse
+    public function update(SaveBankAccountRequest $request): RedirectResponse
     {
-        return $this->bankAccountService->get(auth()->user());
-    }
+        $this->bankAccountService->save(auth()->user(), $request->validated());
 
-    public function save(SaveBankAccountRequest $request): JsonResponse
-    {
-        return $this->bankAccountService->save(auth()->user(), $request->validated());
+        return back()->with('success', 'Bank account saved.');
     }
 }

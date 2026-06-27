@@ -4,36 +4,29 @@ namespace App\Modules\Products\Services;
 
 use App\Models\Product;
 use App\Models\User;
-use App\Modules\Products\Resources\ProductResource;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProductService
 {
-    public function index(User $user): JsonResponse
+    public function index(User $user): Collection
     {
-        $products = Product::where('organization_id', $user->organization_id)
+        return Product::where('organization_id', $user->organization_id)
             ->with('category')
             ->orderBy('name')
             ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => ProductResource::collection($products),
-        ]);
     }
 
-    public function store(User $user, array $data): JsonResponse
+    public function store(User $user, array $data): array
     {
-        // Check name unique per org
         $exists = Product::where('organization_id', $user->organization_id)
             ->where('name', $data['name'])
             ->exists();
 
         if ($exists) {
-            return response()->json([
+            return [
                 'status'  => 'error',
                 'message' => 'A product with this name already exists.',
-            ], 422);
+            ];
         }
 
         $product = Product::create([
@@ -41,26 +34,20 @@ class ProductService
             'organization_id' => $user->organization_id,
         ]);
 
-        return response()->json([
+        return [
             'status'  => 'success',
-            'message' => 'Product created.',
-            'data'    => new ProductResource($product->load('category')),
-        ], 201);
+            'product' => $product->load('category'),
+        ];
     }
 
-    public function show(User $user, int $id): JsonResponse
+    public function show(User $user, int $id): Product
     {
-        $product = Product::where('organization_id', $user->organization_id)
+        return Product::where('organization_id', $user->organization_id)
             ->with('category')
             ->findOrFail($id);
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => new ProductResource($product),
-        ]);
     }
 
-    public function update(User $user, int $id, array $data): JsonResponse
+    public function update(User $user, int $id, array $data): array
     {
         $product = Product::where('organization_id', $user->organization_id)
             ->findOrFail($id);
@@ -72,32 +59,25 @@ class ProductService
                 ->exists();
 
             if ($exists) {
-                return response()->json([
+                return [
                     'status'  => 'error',
                     'message' => 'A product with this name already exists.',
-                ], 422);
+                ];
             }
         }
 
         $product->update($data);
 
-        return response()->json([
+        return [
             'status'  => 'success',
-            'message' => 'Product updated.',
-            'data'    => new ProductResource($product->fresh()->load('category')),
-        ]);
+            'product' => $product->fresh()->load('category'),
+        ];
     }
 
-    public function destroy(User $user, int $id): JsonResponse
+    public function destroy(User $user, int $id): void
     {
-        $product = Product::where('organization_id', $user->organization_id)
-            ->findOrFail($id);
-
-        $product->delete();
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Product deleted.',
-        ]);
+        Product::where('organization_id', $user->organization_id)
+            ->findOrFail($id)
+            ->delete();
     }
 }

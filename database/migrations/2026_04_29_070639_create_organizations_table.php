@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('postal_code', 10)->nullable();
             $table->string('country', 10)->default('ZA');
             $table->string('currency', 10)->default('ZAR');
-            $table->string('logo_filename', 100)->nullable();
+            $table->string('logo_url', 100)->nullable();
             $table->enum('status', ['active', 'suspended', 'deleted'])->default('active');
             $table->timestamps();
             $table->softDeletes();

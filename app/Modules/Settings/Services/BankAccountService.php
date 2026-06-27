@@ -3,35 +3,20 @@
 namespace App\Modules\Settings\Services;
 
 use App\Models\OrganizationBankAccount;
-use App\Services\OrganizationSettingsResolver;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 
 class BankAccountService
 {
-    public function get(User $user): JsonResponse
+    public function get(User $user): ?OrganizationBankAccount
     {
-        $account = OrganizationSettingsResolver::for($user->organization_id)->bankAccount();
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => $account, // null if none saved yet
-        ]);
+        return OrganizationBankAccount::where('organization_id', $user->organization_id)->first();
     }
 
-    public function save(User $user, array $data): JsonResponse
+    public function save(User $user, array $data): OrganizationBankAccount
     {
-        OrganizationBankAccount::updateOrCreate(
+        return OrganizationBankAccount::updateOrCreate(
             ['organization_id' => $user->organization_id],
-            $data
+            $data,
         );
-
-        $account = OrganizationSettingsResolver::for($user->organization_id)->bankAccount();
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Bank account saved.',
-            'data'    => $account,
-        ]);
     }
 }

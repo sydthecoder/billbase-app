@@ -14,7 +14,7 @@ abstract class BasePdfService
             ->setOptions([
                 'defaultFont'     => 'dejavu sans',
                 'isHtml5ParserEnabled' => true,
-                'isRemoteEnabled' => false,
+                'isRemoteEnabled'      => true,
                 'dpi'             => 150,
             ]);
     }

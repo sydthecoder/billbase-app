@@ -3,34 +3,20 @@
 namespace App\Modules\Settings\Services;
 
 use App\Models\OrganizationPreference;
-use App\Services\OrganizationSettingsResolver;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 
 class PreferenceService
 {
-    public function get(User $user): JsonResponse
+    public function get(User $user): ?OrganizationPreference
     {
-        $resolver = OrganizationSettingsResolver::for($user->organization_id);
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => $resolver->allPreferences(),
-        ]);
+        return OrganizationPreference::where('organization_id', $user->organization_id)->first();
     }
 
-    public function update(User $user, array $data): JsonResponse
+    public function update(User $user, array $data): OrganizationPreference
     {
-        OrganizationPreference::updateOrCreate(
+        return OrganizationPreference::updateOrCreate(
             ['organization_id' => $user->organization_id],
-            $data
+            $data,
         );
-
-        $resolver = OrganizationSettingsResolver::for($user->organization_id);
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => $resolver->allPreferences(),
-        ]);
     }
 }

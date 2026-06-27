@@ -23,7 +23,7 @@ class Organization extends Model
         'postal_code',
         'country',
         'currency',
-        'logo_filename',
+        'logo_url',
         'status',
     ];
 
@@ -97,14 +97,5 @@ class Organization extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // Accessors
-    // -------------------------------------------------------------------------
-
-    public function getLogoUrlAttribute(): ?string
-    {
-        return $this->logo_filename ?? null;
     }
 }

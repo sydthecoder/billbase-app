@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Organization;
 use App\Models\Quote;
 use App\Models\Invoice;
+use App\Services\Settings\SettingsService;
 
 class CodeGeneratorService
 {
@@ -35,16 +36,14 @@ class CodeGeneratorService
 
     public static function quote(int $organizationId): string
     {
-        $resolver = OrganizationSettingsResolver::for($organizationId);
-
-        $prefix   = strtoupper($resolver->get('quote_prefix'));
-        $starting = (int) $resolver->get('quote_starting_number');
+        $prefs   = SettingsService::for($organizationId)->preferences();
+        $prefix  = strtoupper($prefs->get('quote_prefix'));
+        $starting = (int) $prefs->get('quote_starting_number');
 
         $count  = Quote::where('organization_id', $organizationId)->withTrashed()->count();
         $number = str_pad($starting + $count, 4, '0', STR_PAD_LEFT);
         $code   = $prefix . '-' . $number;
 
-        // Safety loop — if somehow that code exists, increment
         while (Quote::where('organization_id', $organizationId)->where('quote_number', $code)->exists()) {
             $count++;
             $number = str_pad($starting + $count, 4, '0', STR_PAD_LEFT);
@@ -56,18 +55,17 @@ class CodeGeneratorService
 
     public static function invoice(int $organizationId): string
     {
-        $resolver = OrganizationSettingsResolver::for($organizationId);
-
-        $prefix = strtoupper($resolver->get('invoice_prefix'));
+        $prefs  = SettingsService::for($organizationId)->preferences();
+        $prefix = strtoupper($prefs->get('invoice_prefix'));
 
         $last = Invoice::where('organization_id', $organizationId)
-                    ->orderByDesc('id')
-                    ->value('invoice_number');
+            ->orderByDesc('id')
+            ->value('invoice_number');
 
         if ($last) {
             $next = (int) preg_replace('/[^0-9]/', '', $last) + 1;
         } else {
-            $next = (int) $resolver->get('invoice_starting_number');
+            $next = (int) $prefs->get('invoice_starting_number');
         }
 
         return $prefix . '-' . str_pad($next, 4, '0', STR_PAD_LEFT);
@@ -82,7 +80,7 @@ class CodeGeneratorService
         }
 
         return strtoupper(
-            OrganizationSettingsResolver::for($organizationId)->get('customer_code_prefix')
+            SettingsService::for($organizationId)->preferences()->get('customer_code_prefix')
         );
     }
 }

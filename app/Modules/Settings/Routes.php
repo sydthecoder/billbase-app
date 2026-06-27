@@ -1,32 +1,41 @@
 <?php
 
-use App\Modules\Settings\Controllers\SettingsController;
-use App\Modules\Settings\Controllers\MailSettingsController;
-use App\Modules\Settings\Controllers\PreferenceController;
+use App\Modules\Settings\Controllers\GeneralController;
+use App\Modules\Settings\Controllers\MailController;
 use App\Modules\Settings\Controllers\BankAccountController;
+use App\Modules\Settings\Controllers\PreferencesController;
+use App\Modules\Settings\Controllers\SettingsIndexController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1/settings')->middleware('auth:sanctum')->group(function () {
+Route::middleware(['web', 'auth'])->prefix('settings')->group(function () {
+    /*--------------------------------------------------------------------
+    | Index — single controller, owns the settings page
+    |--------------------------------------------------------------------*/
+    Route::get('/', SettingsIndexController::class)->name('settings.index');
 
-    // User profile
-    Route::get('profile',  [SettingsController::class, 'getProfile']);
-    Route::put('profile',  [SettingsController::class, 'updateProfile']);
+    /*--------------------------------------------------------------------
+    | General
+    |--------------------------------------------------------------------*/
+    Route::put('general',       [GeneralController::class, 'update'])->name('settings.general.update');
+    Route::post('general/logo', [GeneralController::class, 'uploadLogo'])->name('settings.general.logo');
 
-    // Organization profile — owner and admin only
-    Route::get('organization',  [SettingsController::class, 'getOrganization']);
-    Route::put('organization',  [SettingsController::class, 'updateOrganization']);
-    Route::post('organization/logo', [SettingsController::class, 'uploadLogo']);
+    /*--------------------------------------------------------------------
+    | Mail
+    |--------------------------------------------------------------------*/
+    Route::put('mail',       [MailController::class, 'update'])->name('settings.mail.update');
+    Route::post('mail/test', [MailController::class, 'test'])->name('settings.mail.test');
 
-    // Mail settings
-    Route::get('mail/outgoing',       [MailSettingsController::class, 'get']);
-    Route::post('mail/outgoing',      [MailSettingsController::class, 'save']);
-    Route::post('mail/outgoing/test', [MailSettingsController::class, 'test']);
+    /*--------------------------------------------------------------------
+    | Bank Account
+    |--------------------------------------------------------------------*/
+    Route::put('bank-account',  [BankAccountController::class, 'update'])->name('settings.bank-account.update');
 
-    // Preferences
-    Route::get('preferences',  [PreferenceController::class, 'get']);
-    Route::put('preferences',  [PreferenceController::class, 'update']);
+    /*--------------------------------------------------------------------
+    | Preferences
+    |--------------------------------------------------------------------*/
+    Route::put('preferences',       [PreferencesController::class, 'update'])->name('settings.preferences.update');
 
-    // Bank account
-    Route::get('bank-account', [BankAccountController::class, 'get']);
-    Route::post('bank-account', [BankAccountController::class, 'save']);
+    /*--------------------------------------------------------------------
+    | Coming soon
+    |--------------------------------------------------------------------*/
 });

@@ -43,8 +43,6 @@ return [
         */
 
         'invoice_prefix' => 'INV',
-
-        // The number the invoice sequence starts at for new organizations
         'invoice_starting_number' => 1,
 
         // Default number of days before an invoice is due
@@ -61,10 +59,7 @@ return [
         |----------------------------------------------------------------------
         */
 
-        // Prefix used when generating quote numbers e.g. QUO-0001
         'quote_prefix' => 'QUO',
-
-        // The number the quote sequence starts at for new organizations
         'quote_starting_number' => 1,
         'quote_template'   => 'default',
 
@@ -84,7 +79,6 @@ return [
         |----------------------------------------------------------------------
         */
 
-        // Primary brand color shown on invoice PDFs and customer portal
         // Must be a valid hex color code
         'brand_color' => '#0F766E',
         'pdf_branding'=> 'Powered By Bill Base.'

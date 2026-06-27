@@ -1,29 +1,14 @@
 <?php
 
-use App\Modules\Products\Controllers\ProductCategoryController;
 use App\Modules\Products\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
-/**
- * Default throttle (60/min per user) applied to all routes.
- */
-Route::prefix('v1/products')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
-
-    /**
-     * Product Categories 
-     */
-    Route::get('categories',         [ProductCategoryController::class, 'index']);
-    Route::post('categories',        [ProductCategoryController::class, 'store']);
-    Route::put('categories/{id}',    [ProductCategoryController::class, 'update']);
-    Route::delete('categories/{id}', [ProductCategoryController::class, 'destroy']);
-
-    /**
-     * Products
-     */
-    Route::get('/',        [ProductController::class, 'index']);
-    Route::post('/',       [ProductController::class, 'store']);
-    Route::get('/{id}',    [ProductController::class, 'show']);
-    Route::put('/{id}',    [ProductController::class, 'update']);
-    Route::delete('/{id}', [ProductController::class, 'destroy']);
-
+Route::middleware(['web', 'auth', 'throttle:api'])->prefix('products')->group(function () {
+    Route::get('/',          [ProductController::class, 'index'])->name('products.index');
+    Route::get('/create',    [ProductController::class, 'create'])->name('products.create');
+    Route::post('/',         [ProductController::class, 'store'])->name('products.store');
+    Route::get('/{id}',      [ProductController::class, 'show'])->name('products.show');
+    Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/{id}',      [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/{id}',   [ProductController::class, 'destroy'])->name('products.destroy');
 });

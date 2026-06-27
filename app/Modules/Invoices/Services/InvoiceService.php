@@ -5,14 +5,13 @@ namespace App\Modules\Invoices\Services;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
-use App\Models\OrganizationMailSetting;
 use App\Models\Quote;
 use App\Models\User;
-use App\Modules\Invoices\Resources\InvoiceResource;
 use App\Services\CodeGeneratorService;
-use Illuminate\Http\JsonResponse;
+use App\Services\CustomerMailService;
+use App\Services\WhatsAppService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 class InvoiceService
 {
@@ -20,26 +19,19 @@ class InvoiceService
         protected InvoicePdfService $invoicePdfService,
     ) {}
 
-    public function index(User $user): JsonResponse
+    public function index(User $user): Collection
     {
-        $invoices = Invoice::where('organization_id', $user->organization_id)
-            ->with(['customer', 'createdBy', 'items', 'payments'])
+        return Invoice::where('organization_id', $user->organization_id)
+            ->with(['customer', 'items', 'payments'])
             ->orderBy('created_at', 'desc')
             ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => InvoiceResource::collection($invoices),
-        ]);
     }
 
-    public function store(User $user, array $data): JsonResponse
+    public function store(User $user, array $data): array
     {
-        // Validate customer belongs to org
         $customer = Customer::where('organization_id', $user->organization_id)
             ->findOrFail($data['customer_id']);
 
-        // If converting from quote — validate quote belongs to org and is accepted
         if (isset($data['quote_id'])) {
             $quote = Quote::where('organization_id', $user->organization_id)
                 ->where('status', 'accepted')
@@ -50,18 +42,6 @@ class InvoiceService
 
         try {
             $totals = $this->calculateTotals($data['items'], $data);
-
-            // SARS billing address snapshot — always from customer at creation time
-            $billingSnapshot = [
-                'billing_name'           => $customer->first_name . ' ' . $customer->last_name,
-                'billing_company'        => $customer->company_name,
-                'billing_vat_number'     => $customer->vat_number,
-                'billing_street_address' => $customer->street_address,
-                'billing_suburb'         => $customer->suburb,
-                'billing_city'           => $customer->city,
-                'billing_province'       => $customer->province,
-                'billing_postal_code'    => $customer->postal_code,
-            ];
 
             $invoice = Invoice::create([
                 'organization_id'  => $user->organization_id,
@@ -79,12 +59,18 @@ class InvoiceService
                 'total'            => $totals['total'],
                 'notes'            => $data['notes'] ?? null,
                 'footer'           => $data['footer'] ?? config('settings.organization_preferences.invoice_footer'),
-                ...$billingSnapshot,
+                'billing_name'           => $customer->first_name . ' ' . $customer->last_name,
+                'billing_company'        => $customer->company_name,
+                'billing_vat_number'     => $customer->vat_number,
+                'billing_street_address' => $customer->street_address,
+                'billing_suburb'         => $customer->suburb,
+                'billing_city'           => $customer->city,
+                'billing_province'       => $customer->province,
+                'billing_postal_code'    => $customer->postal_code,
             ]);
 
             $this->syncItems($invoice, $data['items']);
 
-            // If converted from quote — lock quote
             if (isset($quote)) {
                 $quote->update([
                     'status'                  => 'converted',
@@ -95,54 +81,39 @@ class InvoiceService
 
             DB::commit();
 
-            return response()->json([
+            return [
                 'status'  => 'success',
-                'message' => 'Invoice created.',
-                'data'    => new InvoiceResource(
-                    $invoice->load(['customer', 'createdBy', 'items', 'payments'])
-                ),
-            ], 201);
+                'invoice' => $invoice->load(['customer', 'items', 'payments']),
+            ];
 
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            return response()->json([
+            return [
                 'status'  => 'error',
                 'message' => 'Failed to create invoice: ' . $e->getMessage(),
-            ], 500);
+            ];
         }
     }
 
-    public function show(User $user, int $id): JsonResponse
+    public function show(User $user, int $id): Invoice
     {
-        $invoice = Invoice::where('organization_id', $user->organization_id)
-            ->with(['customer', 'createdBy', 'items', 'payments'])
+        return Invoice::where('organization_id', $user->organization_id)
+            ->with(['customer', 'items', 'items.product', 'payments', 'organization', 'organization.bankAccount'])
             ->findOrFail($id);
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => new InvoiceResource($invoice),
-        ]);
     }
 
-    public function update(User $user, int $id, array $data): JsonResponse
+    public function update(User $user, int $id, array $data): array
     {
         $invoice = Invoice::where('organization_id', $user->organization_id)
             ->findOrFail($id);
 
-        // Lock check — NEVER allow editing locked invoices
         if ($invoice->is_locked) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Invoice is locked and cannot be edited.',
-            ], 422);
+            return ['status' => 'error', 'message' => 'Invoice is locked and cannot be edited.'];
         }
 
         if (in_array($invoice->status, ['paid', 'cancelled'])) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Invoice cannot be edited in its current status.',
-            ], 422);
+            return ['status' => 'error', 'message' => 'Invoice cannot be edited in its current status.'];
         }
 
         DB::beginTransaction();
@@ -167,118 +138,87 @@ class InvoiceService
 
             DB::commit();
 
-            return response()->json([
+            return [
                 'status'  => 'success',
-                'message' => 'Invoice updated.',
-                'data'    => new InvoiceResource(
-                    $invoice->fresh()->load(['customer', 'createdBy', 'items', 'payments'])
-                ),
-            ]);
+                'invoice' => $invoice->fresh()->load(['customer', 'items', 'payments']),
+            ];
 
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Failed to update invoice: ' . $e->getMessage(),
-            ], 500);
+            return ['status' => 'error', 'message' => 'Failed to update invoice: ' . $e->getMessage()];
         }
     }
 
-    public function destroy(User $user, int $id): JsonResponse
+    public function destroy(User $user, int $id): array
     {
         $invoice = Invoice::where('organization_id', $user->organization_id)
             ->findOrFail($id);
 
         if ($invoice->is_locked || $invoice->status === 'paid') {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Paid or locked invoices cannot be deleted.',
-            ], 422);
+            return ['status' => 'error', 'message' => 'Paid or locked invoices cannot be deleted.'];
         }
 
         $invoice->delete();
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Invoice deleted.',
-        ]);
+        return ['status' => 'success'];
     }
 
-    public function send(User $user, int $id): JsonResponse
+    public function send(User $user, int $id): array
     {
         $invoice = Invoice::where('organization_id', $user->organization_id)
-            ->with(['customer', 'createdBy', 'items', 'payments', 'organization', 'organization.bankAccount'])
+            ->with(['customer', 'items', 'payments', 'organization', 'organization.bankAccount'])
             ->findOrFail($id);
 
         if ($invoice->is_locked && $invoice->status === 'paid') {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Paid invoices cannot be resent.',
-            ], 422);
+            return ['status' => 'error', 'message' => 'Paid invoices cannot be resent.'];
         }
 
         try {
-            // Generate PDF for attachment
             $pdf = $this->invoicePdfService->generate($invoice);
 
-            // Get tenant mail settings — fallback to .env if not configured
-            $mailSetting = OrganizationMailSetting::where('organization_id', $user->organization_id)
-                ->where('is_verified', true)
-                ->first();
+            $sent = CustomerMailService::send(
+                organization: $invoice->organization,
+                to:           $invoice->customer->email,
+                name:         $invoice->customer->first_name . ' ' . $invoice->customer->last_name,
+                subject:      'Invoice ' . $invoice->invoice_number . ' from ' . $invoice->organization->name,
+                view:         'emails.customer.invoice.sent',
+                data:         ['invoice' => $invoice, 'organization' => $invoice->organization],
+                attachments:  [[
+                    'data' => $pdf,
+                    'name' => $invoice->invoice_number . '.pdf',
+                    'mime' => 'application/pdf',
+                ]],
+            );
 
-            if ($mailSetting) {
-                $config = $mailSetting->config;
-                config([
-                    'mail.mailers.smtp.host'      => $config['host'],
-                    'mail.mailers.smtp.port'      => $config['port'],
-                    'mail.mailers.smtp.encryption' => $config['encryption'],
-                    'mail.mailers.smtp.username'   => $config['username'],
-                    'mail.mailers.smtp.password'   => $config['password'],
-                    'mail.from.address'            => $mailSetting->from_email,
-                    'mail.from.name'               => $mailSetting->from_name,
-                ]);
+            if (! $sent) {
+                return ['status' => 'error', 'message' => 'Failed to send invoice email.'];
             }
 
-            Mail::send([], [], function ($message) use ($invoice, $pdf) {
-                $message->to($invoice->customer->email, $invoice->customer->first_name . ' ' . $invoice->customer->last_name)
-                    ->subject('Invoice ' . $invoice->invoice_number . ' from ' . ($invoice->organization->name ?? $invoice->organization->org_code))
-                    ->text('Please find your invoice attached. Amount due: R ' . number_format((float) $invoice->amount_due, 2) . '. Due date: ' . $invoice->due_date->format('d M Y') . '.')
-                    ->attachData($pdf, $invoice->invoice_number . '.pdf', [
-                        'mime' => 'application/pdf',
-                    ]);
-            });
-
-            $path = $this->invoicePdfService->generateAndStore($invoice);
-
-            $invoice->update([
-                'sent_at'          => now(),
-                'status'           => 'sent',
-                'pdf_path'         => $path,
-                'pdf_generated_at' => now(),
-            ]);
+            if ($invoice->customer->phone) {
+                app(WhatsAppService::class)->sendPdf(
+                    phone:     $invoice->customer->phone,
+                    message:   'Hi ' . $invoice->customer->first_name . ', please find your invoice ' . $invoice->invoice_number . ' attached. Amount due: R ' . number_format((float) $invoice->amount_due, 2) . '. Due: ' . $invoice->due_date->format('d M Y') . '.',
+                    pdfBinary: $pdf,
+                    filename:  $invoice->invoice_number . '.pdf',
+                );
+            }
 
             $invoice->update([
                 'sent_at' => now(),
                 'status'  => 'sent',
             ]);
 
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Invoice sent to ' . $invoice->customer->email,
-            ]);
+            return ['status' => 'success', 'message' => 'Invoice sent to ' . $invoice->customer->email];
 
         } catch (\Throwable $e) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Failed to send invoice: ' . $e->getMessage(),
-            ], 500);
+            return ['status' => 'error', 'message' => 'Failed to send invoice: ' . $e->getMessage()];
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
+    /*--------------------------------------------------------------------------
+    | Private helpers
+    |--------------------------------------------------------------------------*/
 
     private function syncItems(Invoice $invoice, array $items): void
     {
@@ -295,7 +235,6 @@ class InvoiceService
                 'unit'            => $item['unit'] ?? null,
                 'unit_price'      => $item['unit_price'],
                 'is_taxable'      => $item['is_taxable'],
-                // Always snapshot from config — never from request
                 'tax_rate'        => $item['is_taxable'] ? config('settings.tax.rate') : 0,
                 'discount_amount' => $item['discount_amount'] ?? 0,
                 'line_total'      => $lineTotal,

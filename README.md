@@ -114,3 +114,4 @@ Notes:
 - The organization is inferred from the authenticated user (`auth()->user()`), so `organization_id` is set server-side.
 - `customer_code` is generated via `App\Services\CodeGeneratorService`.
 - Emails must be unique per organization; duplicates return a 422 response.
+

@@ -3,12 +3,14 @@
 namespace App\Modules\Invoices\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Invoice;
+use App\Models\Customer;
+use App\Models\Product;
 use App\Modules\Invoices\Requests\CreateInvoiceRequest;
 use App\Modules\Invoices\Requests\UpdateInvoiceRequest;
 use App\Modules\Invoices\Services\InvoicePdfService;
 use App\Modules\Invoices\Services\InvoiceService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class InvoiceController extends Controller
 {
@@ -17,65 +19,114 @@ class InvoiceController extends Controller
         protected InvoicePdfService $invoicePdfService,
     ) {}
 
-    public function index(): JsonResponse
+    public function index(): View
     {
-        return $this->invoiceService->index(auth()->user());
+        $invoices = $this->invoiceService->index(auth()->user());
+
+        return view('invoices.index', compact('invoices'));
     }
 
-    public function store(CreateInvoiceRequest $request): JsonResponse
+    public function create(): View
     {
-        return $this->invoiceService->store(auth()->user(), $request->validated());
+        $customers = Customer::where('organization_id', auth()->user()->organization_id)
+            ->where('status', 'active')
+            ->orderBy('first_name')
+            ->get();
+
+        $products = Product::where('organization_id', auth()->user()->organization_id)
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        return view('invoices.create', compact('customers', 'products'));
     }
 
-    public function show(int $id): JsonResponse
+    public function store(CreateInvoiceRequest $request): RedirectResponse
     {
-        return $this->invoiceService->show(auth()->user(), $id);
+        $result = $this->invoiceService->store(auth()->user(), $request->validated());
+
+        if ($result['status'] === 'error') {
+            return back()->withErrors(['general' => $result['message']])->withInput();
+        }
+
+        return redirect()->route('invoices.show', $result['invoice']->id)
+            ->with('success', 'Invoice created.');
     }
 
-    public function update(UpdateInvoiceRequest $request, int $id): JsonResponse
+    public function show(int $id): View
     {
-        return $this->invoiceService->update(auth()->user(), $id, $request->validated());
+        $invoice = $this->invoiceService->show(auth()->user(), $id);
+
+        return view('invoices.show', compact('invoice'));
     }
 
-    public function destroy(int $id): JsonResponse
+    public function edit(int $id): View
     {
-        return $this->invoiceService->destroy(auth()->user(), $id);
+        $invoice = $this->invoiceService->show(auth()->user(), $id);
+
+        $customers = Customer::where('organization_id', auth()->user()->organization_id)
+            ->where('status', 'active')
+            ->orderBy('first_name')
+            ->get();
+
+        $products = Product::where('organization_id', auth()->user()->organization_id)
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        $existingItems = $invoice->items->map(fn($i) => [
+            'product_id'      => $i->product_id,
+            'description'     => $i->description,
+            'quantity'        => $i->quantity,
+            'unit'            => $i->unit,
+            'unit_price'      => $i->unit_price,
+            'is_taxable'      => $i->is_taxable,
+            'discount_amount' => $i->discount_amount,
+        ])->toArray();
+
+        return view('invoices.edit', compact('invoice', 'customers', 'products', 'existingItems'));
     }
 
-    public function send(int $id): JsonResponse
+    public function update(UpdateInvoiceRequest $request, int $id): RedirectResponse
     {
-        return $this->invoiceService->send(auth()->user(), $id);
+        $result = $this->invoiceService->update(auth()->user(), $id, $request->validated());
+
+        if ($result['status'] === 'error') {
+            return back()->withErrors(['general' => $result['message']])->withInput();
+        }
+
+        return redirect()->route('invoices.show', $id)->with('success', 'Invoice updated.');
+    }
+
+    public function destroy(int $id): RedirectResponse
+    {
+        $result = $this->invoiceService->destroy(auth()->user(), $id);
+
+        if ($result['status'] === 'error') {
+            return back()->withErrors(['general' => $result['message']]);
+        }
+
+        return redirect()->route('invoices.index')->with('success', 'Invoice deleted.');
+    }
+
+    public function send(int $id): RedirectResponse
+    {
+        $result = $this->invoiceService->send(auth()->user(), $id);
+
+        if ($result['status'] === 'error') {
+            return back()->withErrors(['general' => $result['message']]);
+        }
+
+        return back()->with('success', $result['message']);
     }
 
     public function pdf(int $id): mixed
     {
-        $invoice = Invoice::where('organization_id', auth()->user()->organization_id)
-            ->findOrFail($id);
-
-        if ($invoice->pdf_path) {
-            return redirect($this->invoicePdfService->presignedUrl($invoice->pdf_path));
-        }
-
-        $pdf = $this->invoicePdfService->generate($invoice);
+        $invoice = $this->invoiceService->show(auth()->user(), $id);
+        $pdf     = $this->invoicePdfService->generate($invoice);
 
         return response($pdf, 200)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="' . $invoice->invoice_number . '.pdf"');
-    }
-
-    public function pdfDownload(int $id): mixed
-    {
-        $invoice = Invoice::where('organization_id', auth()->user()->organization_id)
-            ->findOrFail($id);
-
-        if ($invoice->pdf_path) {
-            return redirect($this->invoicePdfService->presignedUrl($invoice->pdf_path, true));
-        }
-
-        $pdf = $this->invoicePdfService->generate($invoice);
-
-        return response($pdf, 200)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="' . $invoice->invoice_number . '.pdf"');
     }
 }
