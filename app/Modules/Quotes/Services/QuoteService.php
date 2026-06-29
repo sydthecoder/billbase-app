@@ -5,9 +5,8 @@ namespace App\Modules\Quotes\Services;
 use App\Models\Quote;
 use App\Models\QuoteItem;
 use App\Models\User;
-use App\Modules\Quotes\Resources\QuoteResource;
 use App\Services\CodeGeneratorService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class QuoteService
@@ -16,20 +15,15 @@ class QuoteService
         protected QuotePdfService $quotePdfService,
     ) {}
 
-    public function index(User $user): JsonResponse
+    public function index(User $user): Collection
     {
-        $quotes = Quote::where('organization_id', $user->organization_id)
+        return Quote::where('organization_id', $user->organization_id)
             ->with(['customer', 'createdBy'])
             ->orderBy('created_at', 'desc')
             ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => QuoteResource::collection($quotes),
-        ]);
     }
 
-    public function store(User $user, array $data): JsonResponse
+    public function store(User $user, array $data): array
     {
         DB::beginTransaction();
 
@@ -58,45 +52,35 @@ class QuoteService
 
             DB::commit();
 
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Quote created.',
-                'data'    => new QuoteResource($quote->load(['customer', 'createdBy', 'items'])),
-            ], 201);
+            return [
+                'status' => 'success',
+                'quote'  => $quote->load(['customer', 'createdBy', 'items']),
+            ];
 
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            return response()->json([
+            return [
                 'status'  => 'error',
                 'message' => 'Failed to create quote: ' . $e->getMessage(),
-            ], 500);
+            ];
         }
     }
 
-    public function show(User $user, int $id): JsonResponse
+    public function show(User $user, int $id): Quote
     {
-        $quote = Quote::where('organization_id', $user->organization_id)
-            ->with(['customer', 'createdBy', 'items'])
+        return Quote::where('organization_id', $user->organization_id)
+            ->with(['customer', 'createdBy', 'items', 'items.product', 'organization', 'organization.bankAccount'])
             ->findOrFail($id);
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => new QuoteResource($quote),
-        ]);
     }
 
-    public function update(User $user, int $id, array $data): JsonResponse
+    public function update(User $user, int $id, array $data): array
     {
         $quote = Quote::where('organization_id', $user->organization_id)
             ->findOrFail($id);
 
-        // Lock check
         if ($quote->isLocked()) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'This quote is locked and cannot be edited.',
-            ], 422);
+            return ['status' => 'error', 'message' => 'This quote is locked and cannot be edited.'];
         }
 
         DB::beginTransaction();
@@ -104,7 +88,6 @@ class QuoteService
         try {
             $updateData = collect($data)->except('items')->toArray();
 
-            // Recalculate if items are being updated
             if (isset($data['items'])) {
                 $totals = $this->calculateTotals($data['items'], array_merge(
                     $quote->toArray(),
@@ -122,52 +105,39 @@ class QuoteService
 
             DB::commit();
 
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Quote updated.',
-                'data'    => new QuoteResource($quote->fresh()->load(['customer', 'createdBy', 'items'])),
-            ]);
+            return [
+                'status' => 'success',
+                'quote'  => $quote->fresh()->load(['customer', 'createdBy', 'items']),
+            ];
 
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Failed to update quote: ' . $e->getMessage(),
-            ], 500);
+            return ['status' => 'error', 'message' => 'Failed to update quote: ' . $e->getMessage()];
         }
     }
 
-    public function destroy(User $user, int $id): JsonResponse
+    public function destroy(User $user, int $id): array
     {
         $quote = Quote::where('organization_id', $user->organization_id)
             ->findOrFail($id);
 
         if ($quote->isLocked()) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'This quote is locked and cannot be deleted.',
-            ], 422);
+            return ['status' => 'error', 'message' => 'This quote is locked and cannot be deleted.'];
         }
 
         $quote->delete();
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Quote deleted.',
-        ]);
+        return ['status' => 'success'];
     }
 
-    public function updateStatus(User $user, int $id, string $status): JsonResponse
+    public function updateStatus(User $user, int $id, string $status): array
     {
         $quote = Quote::where('organization_id', $user->organization_id)
             ->findOrFail($id);
 
         if ($quote->isLocked()) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'This quote is locked and its status cannot be changed.',
-            ], 422);
+            return ['status' => 'error', 'message' => 'This quote is locked and its status cannot be changed.'];
         }
 
         $timestamps = [];
@@ -175,37 +145,28 @@ class QuoteService
         if ($status === 'sent') {
             $timestamps['sent_at'] = now();
 
-            // Generate PDF and store to R2 on first send only
-            if (!$quote->pdf_path) {
+            if (! $quote->pdf_path) {
                 try {
                     $path = $this->quotePdfService->generateAndStore($quote);
                     $timestamps['pdf_path']         = $path;
                     $timestamps['pdf_generated_at'] = now();
                 } catch (\Throwable $e) {
-                    return response()->json([
-                        'status'  => 'error',
-                        'message' => 'Failed to generate PDF: ' . $e->getMessage(),
-                    ], 500);
+                    return ['status' => 'error', 'message' => 'Failed to generate PDF: ' . $e->getMessage()];
                 }
             }
         }
 
         $quote->update(array_merge(['status' => $status], $timestamps));
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Quote status updated.',
-            'data'    => new QuoteResource($quote->fresh()->load(['customer', 'createdBy', 'items'])),
-        ]);
+        return ['status' => 'success'];
     }
 
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
+    /*--------------------------------------------------------------------------
+    | Private helpers
+    |--------------------------------------------------------------------------*/
 
     private function syncItems(Quote $quote, array $items): void
     {
-        // Delete existing items and replace — clean replace strategy
         $quote->items()->delete();
 
         foreach ($items as $index => $item) {
@@ -219,10 +180,7 @@ class QuoteService
                 'unit'            => $item['unit'] ?? null,
                 'unit_price'      => $item['unit_price'],
                 'is_taxable'      => $item['is_taxable'] ?? true,
-                // Snapshot tax rate at creation time from config
-                'tax_rate'        => ($item['is_taxable'] ?? true)
-                                        ? config('settings.tax.rate')
-                                        : 0,
+                'tax_rate'        => ($item['is_taxable'] ?? true) ? config('settings.tax.rate') : 0,
                 'discount_amount' => $item['discount_amount'] ?? 0,
                 'line_total'      => $lineTotal,
                 'sort_order'      => $item['sort_order'] ?? $index,
@@ -255,7 +213,6 @@ class QuoteService
             }
         }
 
-        // Apply quote-level discount
         $discountAmount  = (float) ($data['discount_amount'] ?? 0);
         $discountPercent = (float) ($data['discount_percent'] ?? 0);
 
@@ -266,9 +223,9 @@ class QuoteService
         $total = round(($subtotal + $taxTotal) - $discountAmount, 2);
 
         return [
-            'subtotal' => round($subtotal, 2),
+            'subtotal'  => round($subtotal, 2),
             'tax_total' => round($taxTotal, 2),
-            'total'    => $total,
+            'total'     => $total,
         ];
     }
 }

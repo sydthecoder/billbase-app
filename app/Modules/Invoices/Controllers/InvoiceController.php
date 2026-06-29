@@ -38,7 +38,9 @@ class InvoiceController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('invoices.create', compact('customers', 'products'));
+        $quoteId = request()->query('quote_id');
+
+        return view('invoices.create', compact('customers', 'products', 'quoteId'));
     }
 
     public function store(CreateInvoiceRequest $request): RedirectResponse

@@ -492,7 +492,7 @@
     <div class="footer">
         {{ $prefs['invoice_footer'] }}
 
-        @if($invoice->organization->activeSubscription?->plan?->slug === 'free')
+        @if($quote->organization->activeSubscription?->plan?->slug === 'free')
             <br>
             <span style="font-size: 14px; color: #cccccc;">
                 {{ $prefs['pdf_branding'] }}
@@ -503,3 +503,4 @@
 </div>
 </body>
 </html>
+

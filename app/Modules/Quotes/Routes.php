@@ -3,21 +3,15 @@
 use App\Modules\Quotes\Controllers\QuoteController;
 use Illuminate\Support\Facades\Route;
 
-/**
- * Default throttle (60/min per user) applied to all routes.
- * PDF endpoints further restricted to 10/min.
- */
-Route::prefix('v1/quotes')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
-    Route::get('/',              [QuoteController::class, 'index']);
-    Route::post('/',             [QuoteController::class, 'store']);
-    Route::get('/{id}',          [QuoteController::class, 'show']);
-    Route::put('/{id}',          [QuoteController::class, 'update']);
-    Route::delete('/{id}',       [QuoteController::class, 'destroy']);
-    Route::patch('/{id}/status', [QuoteController::class, 'updateStatus']);
-
-    // PDF generation — heavier operation, stricter limit
-    Route::get('/{id}/pdf',          [QuoteController::class, 'pdf'])
-        ->middleware('throttle:10,1');
-    Route::get('/{id}/pdf/download', [QuoteController::class, 'pdfDownload'])
-        ->middleware('throttle:10,1');
+Route::middleware(['web', 'auth'])->prefix('quotes')->group(function () {
+    Route::get('/',              [QuoteController::class, 'index'])->name('quotes.index');
+    Route::get('/create',        [QuoteController::class, 'create'])->name('quotes.create');
+    Route::post('/',             [QuoteController::class, 'store'])->name('quotes.store');
+    Route::get('/{id}',          [QuoteController::class, 'show'])->name('quotes.show');
+    Route::get('/{id}/edit',     [QuoteController::class, 'edit'])->name('quotes.edit');
+    Route::put('/{id}',          [QuoteController::class, 'update'])->name('quotes.update');
+    Route::delete('/{id}',       [QuoteController::class, 'destroy'])->name('quotes.destroy');
+    Route::post('/{id}/send',    [QuoteController::class, 'send'])->name('quotes.send');
+    Route::post('/{id}/status',  [QuoteController::class, 'updateStatus'])->name('quotes.status');
+    Route::get('/{id}/pdf',      [QuoteController::class, 'pdf'])->name('quotes.pdf');
 });
