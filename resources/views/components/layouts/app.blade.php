@@ -1,20 +1,3 @@
-<!--
-
-=========================================================
-* Volt Free - Bootstrap 5 Dashboard
-=========================================================
-
-* Product Page: https://themesberg.com/product/admin-dashboard/volt-bootstrap-5-dashboard
-* Copyright 2021 Themesberg (https://www.themesberg.com)
-* License (https://themesberg.com/licensing)
-
-* Designed and coded by https://themesberg.com
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Please contact us to request a removal.
-
--->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -26,7 +9,7 @@
     <link type="text/css" href="../../vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
 
-    @vite('resources/css/main.css')
+    @vite('resources/css/app.css')
 
     <style>
         [x-cloak] { display: none !important; }
