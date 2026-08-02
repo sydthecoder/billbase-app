@@ -1,4 +1,4 @@
-name: Deploy BillBase
+name: Deploy to CloudPanel
 
 on:
   push:
@@ -7,16 +7,15 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/billbase-app/htdocs/app.billbase.co.za
+            cd ${{ secrets.DEPLOY_PATH }}
             git pull origin main
             composer install --no-dev --optimize-autoloader
             npm install

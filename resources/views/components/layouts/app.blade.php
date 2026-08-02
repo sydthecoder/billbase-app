@@ -18,7 +18,7 @@
 
 <body>        
 
-    <div class="flex">
+    <div>
         <x-layouts.partials.sidebar />
     
         <div class="pl-65">
