@@ -7,12 +7,20 @@ use App\Modules\Settings\Requests\SaveMailSettingsRequest;
 use App\Modules\Settings\Requests\TestMailSettingsRequest;
 use App\Modules\Settings\Services\MailService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class MailController extends Controller
 {
     public function __construct(
         protected MailService $mailService,
     ) {}
+
+    public function index(): View
+    {
+        return view('settings.mail', [
+            'mailSetting' => $this->mailService->get(auth()->user()),
+        ]);
+    }
 
     public function update(SaveMailSettingsRequest $request): RedirectResponse
     {

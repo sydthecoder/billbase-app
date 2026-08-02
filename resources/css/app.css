@@ -8,5 +8,6 @@
 @source "../**/*.vue";
 
 body {
-    font-family: "abeezee";
+    font-family: "Geomini";
+    background-color: #f9fafb;
 }

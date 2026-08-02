@@ -10,6 +10,10 @@
 
     @vite('resources/css/app.css')
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geomini:wght@200..800&display=swap" rel="stylesheet">
+
     <style>
         [x-cloak] { display: none !important; }
     </style>
@@ -21,10 +25,10 @@
     <div>
         <x-layouts.partials.sidebar />
     
-        <div class="pl-65">
+        <div class="md:pl-65">
             <x-layouts.partials.topbar />
 
-            <main class="min-h-[80vh] mt-20">
+            <main class="min-h-[80vh] mt-16 p-6">
                 {{ $slot }}
             </main>
             

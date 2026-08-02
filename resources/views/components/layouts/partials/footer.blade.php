@@ -1,6 +1,6 @@
-<footer class="w-full border-t border-[#e5e7eb] pt-6 mt-12 flex flex-col md:flex-row items-center justify-between gap-[16px]">
+<footer class="border-t border-[#e5e7eb] py-6 px-6 mt-12 flex flex-col md:flex-row items-center justify-between gap-4">
     <div class="font-satoshi text-[14px] text-[#6b7280]">
-        &copy; 2026 BillFlow Inc. All rights reserved.
+        &copy; {{ now()->year }} BillBase. All rights reserved.
     </div>
     
     <div class="flex items-center gap-6">

@@ -1,3 +1,8 @@
+<x-ui.breadcrumb :items="[
+    ['label' => 'Settings', 'url' => route('settings.general.index')],
+    ['label' => 'General'],
+]" />
+
 <form method="POST" action="{{ route('settings.bank-account.update') }}">
     @csrf
     @method('PUT')
