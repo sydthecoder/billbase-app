@@ -1,4 +1,4 @@
-]FROM dwchiang/nginx-php-fpm:8.3.21-fpm-bookworm-nginx-1.27.4
+FROM dwchiang/nginx-php-fpm:8.3.21-fpm-bookworm-nginx-1.27.4
 
 # Copy your Laravel app in
 COPY . /var/www/html
