@@ -1,25 +1,14 @@
-FROM richarvey/nginx-php-fpm:latest
+]FROM dwchiang/nginx-php-fpm:8.3.21-fpm-bookworm-nginx-1.27.4
 
-# Copy app source
-COPY . .
+# Copy your Laravel app in
+COPY . /var/www/html
 
-# Nginx/PHP-FPM image config
-ENV SKIP_COMPOSER=1
-ENV WEBROOT=/var/www/html/public
-ENV PHP_ERRORS_STDERR=1
-ENV RUN_SCRIPTS=1
-ENV REAL_IP_HEADER=1
-ENV COMPOSER_ALLOW_SUPERUSER=1
+# Install PHP extensions Laravel needs
+RUN docker-php-ext-install pdo_mysql bcmath opcache
 
-# Laravel production settings
-ENV APP_ENV=production
-ENV APP_DEBUG=false
-ENV LOG_CHANNEL=stderr
+WORKDIR /var/www/html
 
-# Install composer deps at build time (not runtime)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Laravel needs writable storage/cache dirs
-RUN chmod -R 777 storage bootstrap/cache
-
-CMD ["/start.sh"]
+# Install composer + deps
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && composer install --no-dev --optimize-autoloader --no-interaction \
+    && chmod -R 775 storage bootstrap/cache
