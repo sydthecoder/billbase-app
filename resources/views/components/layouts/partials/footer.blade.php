@@ -1,29 +1,19 @@
-<footer class="bg-white rounded shadow p-4 mb-4 mt-4">
-    <div class="row">
-        <div class="col-12 col-md-4 col-xl-6 mb-4 mb-md-0">
-            <p class="mb-0 text-center text-lg-start">
-                &copy; {{ now()->year }} BillBase. All Rights Reserved.
-            </p>
-        </div>
+<footer class="w-full border-t border-[#e5e7eb] pt-6 mt-12 flex flex-col md:flex-row items-center justify-between gap-[16px]">
+    <div class="font-satoshi text-[14px] text-[#6b7280]">
+        &copy; 2026 BillFlow Inc. All rights reserved.
+    </div>
+    
+    <div class="flex items-center gap-6">
+        <a href="#" class="font-satoshi text-[14px] font-medium text-[#6b7280] hover:text-[#5727e7] transition-colors">
+            Documentation
+        </a>
 
-        <div class="col-12 col-md-8 col-xl-6 text-center text-lg-start">
-            <ul class="list-inline list-group-flush list-group-borderless text-md-end mb-0">
-                <li class="list-inline-item px-0 px-sm-2">
-                    <a href="https://themesberg.com/about">About</a>
-                </li>
+        <a href="#" class="font-satoshi text-[14px] font-medium text-[#6b7280] hover:text-[#5727e7] transition-colors">
+            Support
+        </a>
 
-                <li class="list-inline-item px-0 px-sm-2">
-                    <a href="https://themesberg.com/themes">Themes</a>
-                </li>
-
-                <li class="list-inline-item px-0 px-sm-2">
-                    <a href="https://themesberg.com/blog">Blog</a>
-                </li>
-
-                <li class="list-inline-item px-0 px-sm-2">
-                    <a href="https://themesberg.com/contact">Contact</a>
-                </li>
-            </ul>
-        </div>
+        <a href="#" class="font-satoshi text-[14px] font-medium text-[#6b7280] hover:text-[#5727e7] transition-colors">
+            API Status
+        </a>
     </div>
 </footer>

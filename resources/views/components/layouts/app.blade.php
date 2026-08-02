@@ -6,7 +6,6 @@
     <title>Volt - Free Bootstrap 5 Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link type="text/css" href="../../vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
 
     @vite('resources/css/app.css')
@@ -18,19 +17,21 @@
 </head>
 
 <body>        
-    <x-layouts.partials.mobile-topbar />
 
-    <x-sidebar />
+    <div class="flex">
+        <x-layouts.partials.sidebar />
     
-    <main class="content">
-        <x-layouts.partials.topbar />
+        <div class="pl-65">
+            <x-layouts.partials.topbar />
 
-        {{ $slot }}
-        
-        <x-layouts.partials.footer />
-    </main>
+            <main class="min-h-[80vh] mt-20">
+                {{ $slot }}
+            </main>
+            
+            <x-layouts.partials.footer />
+        </div> 
+    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.2/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/notyf/3.10.0/notyf.min.js"></script>
     @stack('scripts')
     <script src="{{ asset('js/main.js') }}"></script>

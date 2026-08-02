@@ -1,60 +1,41 @@
-<nav class="navbar navbar-top navbar-expand navbar-dashboard navbar-dark ps-0 pe-2 pb-0">
-    <div class="container-fluid px-0">
-        <div class="d-flex justify-content-between w-100" id="navbarSupportedContent">
-            <div class="d-flex align-items-center">
-                <form class="navbar-search form-inline" id="navbar-search-main">
-                    <div class="input-group input-group-merge search-bar">
-                        <span class="input-group-text" id="topbar-addon">
-                            <svg class="icon icon-xs" x-description="Heroicon name: solid/search" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-                            </svg>
-                        </span>
-
-                        <input type="text" class="form-control" id="topbarInputIconLeft" placeholder="Search" aria-label="Search" aria-describedby="topbar-addon">
-                    </div>
-                </form>
-            </div>
-
-            <ul class="navbar-nav align-items-center">
-                <li class="nav-item dropdown ms-lg-3">
-                    <a class="nav-link dropdown-toggle pt-1 px-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="media d-flex align-items-center">
-                            <img class="avatar rounded-circle" alt="Image placeholder" src="{{ asset('/images/avatars/profile-picture-1.jpg') }}">
-                            
-                            <div class="media-body ms-2 text-dark align-items-center d-none d-lg-block">
-                                <span class="mb-0 font-small fw-bold text-gray-900">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</span>
-                            </div>
-                        </div>
-                    </a>
-
-                    <div class="dropdown-menu dashboard-dropdown dropdown-menu-end mt-2 py-1">
-                        <a class="dropdown-item d-flex align-items-center" href="#">
-                            <svg class="dropdown-icon text-gray-400 me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd"></path></svg>
-                            My Profile
-                        </a>
-
-                        <a href="{{ route('settings.index') }}" class="dropdown-item d-flex align-items-center">
-                            <svg class="dropdown-icon text-gray-400 me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path></svg>
-                            Settings
-                        </a>
-
-                        <a class="dropdown-item d-flex align-items-center" href="#">
-                            <svg class="dropdown-icon text-gray-400 me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 .993-.241 1.929-.668 2.754l-1.524-1.525a3.997 3.997 0 00.078-2.183l1.562-1.562C15.802 8.249 16 9.1 16 10zm-5.165 3.913l1.58 1.58A5.98 5.98 0 0110 16a5.976 5.976 0 01-2.516-.552l1.562-1.562a4.006 4.006 0 001.789.027zm-4.677-2.796a4.002 4.002 0 01-.041-2.08l-.08.08-1.53-1.533A5.98 5.98 0 004 10c0 .954.223 1.856.619 2.657l1.54-1.54zm1.088-6.45A5.974 5.974 0 0110 4c.954 0 1.856.223 2.657.619l-1.54 1.54a4.002 4.002 0 00-2.346.033L7.246 4.668zM12 10a2 2 0 11-4 0 2 2 0 014 0z" clip-rule="evenodd"></path></svg>
-                            Support
-                        </a>
-
-                        <div role="separator" class="dropdown-divider my-1"></div>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="dropdown-item d-flex align-items-center">
-                                <svg class="dropdown-icon text-danger me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>                
-                                Logout
-                            </button>
-                        </form>
-                    </div>
-                </li>
-            </ul>
-        </div>
+<header class="w-full h-18 fixed top-0 bg-[#ffffff] border-b border-[#e5e7eb] px-6 flex items-center justify-between z-10 shrink-0">
+  
+  <!-- Left: Global Search -->
+  <div class="relative w-full max-w-md">
+    <div class="absolute inset-y-0 left-0 pl-[16px] flex items-center pointer-events-none text-[#6b7280]">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
     </div>
-</nav>
+    <input 
+      type="text" 
+      placeholder="Search invoices, clients, or transactions..." 
+      class="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-[12px] pl-[44px] pr-[16px] py-[10px] font-satoshi text-[14px] text-[#030712] placeholder-[#6b7280] focus:outline-none focus:bg-[#ffffff] focus:border-[#5727e7] focus:ring-[1px] focus:ring-[#5727e7] transition-all"
+    >
+    <!-- Keyboard shortcut hint -->
+    <div class="absolute inset-y-0 right-0 pr-[12px] flex items-center pointer-events-none">
+      <span class="font-satoshi text-[12px] font-[500] text-[#6b7280] bg-[#ffffff] border border-[#e5e7eb] rounded-[6px] px-[6px] py-[2px] shadow-[0_1px_2px_0_rgba(0,0,0,0.06)]">
+        ⌘K
+      </span>
+    </div>
+  </div>
+  
+  <!-- Right: Quick Actions -->
+  <div class="flex items-center gap-[16px]">
+    
+    <!-- Notifications -->
+    <button class="relative w-[40px] h-[40px] flex items-center justify-center rounded-[12px] text-[#4b5563] border border-[#e5e7eb] bg-[#ffffff] hover:bg-[#f9fafb] hover:text-[#030712] transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.06)]">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      <!-- Unread Pulse Indicator -->
+      <span class="absolute top-[8px] right-[10px] w-[8px] h-[8px] bg-[#f25330] rounded-full border-[1.5px] border-[#ffffff]"></span>
+    </button>
+
+    <!-- Divider -->
+    <div class="w-[1px] h-[24px] bg-[#e5e7eb]"></div>
+    
+    <!-- Quick Add / Create -->
+    <button class="bg-[#5727e7] text-[#ffffff] font-satoshi text-[14px] font-[500] px-[16px] py-[10px] rounded-[12px] shadow-[0_1px_2px_0_rgba(0,0,0,0.06)] hover:bg-[#4a1fd4] transition-colors flex items-center gap-[8px]">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Create
+    </button>
+    
+  </div>
+</header>

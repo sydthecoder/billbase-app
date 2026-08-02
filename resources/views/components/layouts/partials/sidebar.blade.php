@@ -42,89 +42,72 @@
     $settingsActive = request()->routeIs('settings.*');
 @endphp
 
-<aside id="sidebarMenu" class="sidebar d-lg-block bg-gray-800 text-white collapse" data-simplebar>
-    <nav>
-        <div class="sidebar-inner px-4 pt-3">
+<aside class="w-65 bg-white fixed top-0 left-0 h-full border-r border-[#e5e7eb]">
+    <div class="h-18 flex items-center px-6 border-b border-[#e5e7eb]">
+        <a href="">
+            <img src="{{ asset('logo.png') }}" alt="BillBase" class="h-12">
+        </a>
+    </div>
 
-            <div class="user-card d-flex d-md-none align-items-center justify-content-between pb-4">
-                <div class="d-flex align-items-center">
-                    <div class="d-block">
-                        <h2 class="h5 mb-3">Hi, {{ auth()->user()->first_name }}</h2>
-                        <a href="{{ route('logout') }}" class="btn btn-secondary btn-sm d-inline-flex align-items-center"
-                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <svg class="icon icon-xxs me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                            Sign Out
-                        </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
-                    </div>
-                </div>
-                <div class="collapse-close d-md-none">
-                    <a href="#sidebarMenu" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
-                        <svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    </a>
-                </div>
+    <nav class="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-3 text-[16px] font-medium text-[#4b5563] hover:bg-[#f9fafb] hover:text-[#030712] transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Overview
+        </a>
+
+        <a href="#" class="flex items-center justify-between px-3 py-2.5 rounded-3 text-[16px] font-medium text-[#4b5563] hover:bg-[#f9fafb] hover:text-[#030712] transition-colors">
+            <div class="flex items-center gap-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            Invoices
             </div>
+            <span class="bg-[#f2f2ff] text-[#5727e7] text-3 px-2 py-0.5 rounded-md font-semibold">14</span>
+        </a>
 
-            <ul class="nav flex-column pt-3 pt-md-0">
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-3 text-[16px] font-medium text-[#4b5563] hover:bg-[#f9fafb] hover:text-[#030712] transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            Clients
+        </a>
+        
+        <div class="w-full h-px bg-[#e5e7eb] my-2"></div>
+        
+        <div class="flex flex-col gap-1">
+            <button class="w-full flex items-center justify-between px-3 py-3 rounded-3 text-[16px] font-semibold text-[#030712] transition-colors">
+                <div class="flex items-center gap-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    Settings
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transform rotate-180 transition-transform"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            
+            <div class="flex flex-col gap-1 pl-9 pr-2">
+                <a href="#" class="block px-3 py-2 rounded-md text-[14px] font-semibold text-[#5727e7] bg-[#f2f2ff] transition-colors">
+                    General
+                </a>
 
-                <li class="nav-item mb-2">
-                    <a href="{{ route('dashboard') }}" class="nav-link d-flex align-items-center">
-                        <span class="sidebar-icon">
-                            <img src="{{ asset('images/brand/light.svg') }}" height="20" width="20" alt="BillBase">
-                        </span>
-                        <span class="mt-1 ms-1 sidebar-text fw-bold">BillBase</span>
-                    </a>
-                </li>
+                <a href="#" class="block px-3 py-2 rounded-md text-[14px] font-medium text-[#4b5563] hover:text-[#030712] hover:bg-[#f9fafb] transition-colors">
+                    Delivery & Security
+                </a>
 
-                @foreach($navItems as $item)
-                    <li class="nav-item {{ request()->routeIs($item['route']) ? 'active' : '' }}">
-                        <a href="{{ route($item['route']) }}" class="nav-link">
-                            <span class="sidebar-icon">
-                                <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20">{!! $item['icon'] !!}</svg>
-                            </span>
-                            <span class="sidebar-text">{{ $item['label'] }}</span>
-                        </a>
-                    </li>
-                @endforeach
+                <a href="#" class="block px-3 py-2 rounded-md text-[14px] font-medium text-[#4b5563] hover:text-[#030712] hover:bg-[#f9fafb] transition-colors">
+                    Payment Gateways
+                </a>
 
-                <li class="nav-item {{ $settingsActive ? 'active' : '' }}">
-                    <span class="nav-link {{ $settingsActive ? '' : 'collapsed' }} d-flex justify-content-between align-items-center"
-                        data-bs-toggle="collapse" data-bs-target="#submenu-settings" style="cursor:pointer;">
-                        <span>
-                            <span class="sidebar-icon">
-                                <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path></svg>
-                            </span>
-                            <span class="sidebar-text">Settings</span>
-                        </span>
-                        <span class="link-arrow">
-                            <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
-                        </span>
-                    </span>
-                    <div class="multi-level collapse {{ $settingsActive ? 'show' : '' }}" id="submenu-settings">
-                        <ul class="flex-column nav">
-                            @foreach($settingsItems as $sub)
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route($sub['route']) }}">
-                                        <span class="sidebar-text">{{ $sub['label'] }}</span>
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </li>
-
-                <li role="separator" class="dropdown-divider mt-4 mb-3 border-gray-700"></li>
-
-                <li class="nav-item">
-                    <a href="#" class="btn btn-secondary d-flex align-items-center justify-content-center btn-upgrade-pro">
-                        <span class="sidebar-icon d-inline-flex align-items-center justify-content-center">
-                            <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"></path></svg>
-                        </span>
-                        <span>Upgrade to Pro</span>
-                    </a>
-                </li>
-
-            </ul>
+                <a href="#" class="block px-3 py-2 rounded-md text-[14px] font-medium text-[#4b5563] hover:text-[#030712] hover:bg-[#f9fafb] transition-colors">
+                    Team Members
+                </a>
+            </div>
         </div>
     </nav>
+        
+    <div class="p-4 border-t border-[#e5e7eb]">
+        <div class="bg-[#f2f2ff] border border-[#5727e7]/20 rounded-lg flex items-center gap-3 p-2 rounded-3 hover:bg-[#f9fafb] cursor-pointer transition-colors">
+            <div class="w-10 h-10 rounded-[50px] bg-[#f2f2ff] border border-[#5727e7] flex items-center justify-center text-[#5727e7] font-semibold text-[14px]">RS</div>
+            
+            <div class="flex flex-col flex-1 overflow-hidden">
+                <span class="text-sm font-semibold text-[#030712] truncate">
+                    {{ auth()->user()->first_name }} {{ auth()->user()->last_name }}
+                </span>
+            </div>
+        </div>
+    </div>
 </aside>
