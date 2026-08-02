@@ -3,8 +3,12 @@ FROM dwchiang/nginx-php-fpm:8.3.21-fpm-bookworm-nginx-1.27.4
 # Copy your Laravel app in
 COPY . /var/www/html
 
-# Install PHP extensions Laravel needs
-RUN docker-php-ext-install pdo_mysql bcmath opcache
+# System packages needed to build the zip extension + unzip CLI fallback
+RUN apt-get update && apt-get install -y libzip-dev unzip zip \
+    && rm -rf /var/lib/apt/lists/*
+
+# PHP extensions Laravel needs
+RUN docker-php-ext-install pdo_mysql bcmath opcache zip
 
 WORKDIR /var/www/html
 
