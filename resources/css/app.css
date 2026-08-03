@@ -7,6 +7,24 @@
 @source "../**/*.js";
 @source "../**/*.vue";
 
+[x-cloak] { display: none !important; }
+
+@theme {
+    --color-primary-50:  #e7fdfb;
+    --color-primary-100: #cffcf7;
+    --color-primary-200: #9cfcf1;
+    --color-primary-300: #5cffec;
+    --color-primary-400: #00ffe1;
+    --color-primary-500: #008374;  
+    --color-primary-600: #006b5f;
+    --color-primary-700: #00574d;
+    --color-primary-800: #00473f;
+    --color-primary-900: #003832;
+    --color-primary-950: #02221e;
+
+    --color-dark-500: #1e272c;
+}
+
 body {
     font-family: "Geomini";
     background-color: #f9fafb;
