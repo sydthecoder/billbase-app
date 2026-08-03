@@ -11,7 +11,7 @@
     ];
 
     $productsLinks = [
-        ['route' => 'products.index', 'active' => 'products.*', 'label' => 'List'],
+        ['route' => 'products.index', 'active' => ['products.index', 'products.create', 'products.show', 'products.edit'], 'label' => 'List'],
         ['route' => 'products.categories.index', 'active' => 'products.categories.*', 'label' => 'Categories'],
     ];
 @endphp
