@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+Route::get('/', function () {
+    return redirect()->route('dashboard'); 
+});
+
 require base_path('app/Modules/Auth/Routes.php');
 require base_path('app/Modules/Dashboard/Routes.php');
 require base_path('app/Modules/Lookup/Routes.php');
