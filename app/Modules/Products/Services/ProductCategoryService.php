@@ -4,34 +4,34 @@ namespace App\Modules\Products\Services;
 
 use App\Models\ProductCategory;
 use App\Models\User;
-use App\Modules\Products\Resources\ProductCategoryResource;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProductCategoryService
 {
-    public function index(User $user): JsonResponse
+    public function index(User $user): Collection
     {
-        $categories = ProductCategory::where('organization_id', $user->organization_id)
+        return ProductCategory::where('organization_id', $user->organization_id)
             ->orderBy('name')
             ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => ProductCategoryResource::collection($categories),
-        ]);
     }
 
-    public function store(User $user, array $data): JsonResponse
+    public function show(User $user, int $id): ProductCategory
+    {
+        return ProductCategory::where('organization_id', $user->organization_id)
+            ->findOrFail($id);
+    }
+
+    public function store(User $user, array $data): array
     {
         $exists = ProductCategory::where('organization_id', $user->organization_id)
             ->where('name', $data['name'])
             ->exists();
 
         if ($exists) {
-            return response()->json([
+            return [
                 'status'  => 'error',
                 'message' => 'A category with this name already exists.',
-            ], 422);
+            ];
         }
 
         $category = ProductCategory::create([
@@ -39,14 +39,13 @@ class ProductCategoryService
             'organization_id' => $user->organization_id,
         ]);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Category created.',
-            'data'    => new ProductCategoryResource($category),
-        ], 201);
+        return [
+            'status'   => 'success',
+            'category' => $category,
+        ];
     }
 
-    public function update(User $user, int $id, array $data): JsonResponse
+    public function update(User $user, int $id, array $data): array
     {
         $category = ProductCategory::where('organization_id', $user->organization_id)
             ->findOrFail($id);
@@ -58,33 +57,25 @@ class ProductCategoryService
                 ->exists();
 
             if ($exists) {
-                return response()->json([
+                return [
                     'status'  => 'error',
                     'message' => 'A category with this name already exists.',
-                ], 422);
+                ];
             }
         }
 
         $category->update($data);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Category updated.',
-            'data'    => new ProductCategoryResource($category->fresh()),
-        ]);
+        return [
+            'status'   => 'success',
+            'category' => $category->fresh(),
+        ];
     }
 
-    public function destroy(User $user, int $id): JsonResponse
+    public function destroy(User $user, int $id): void
     {
-        $category = ProductCategory::where('organization_id', $user->organization_id)
-            ->findOrFail($id);
-
-        // Hard delete — SET NULL fires at DB level on products
-        $category->forceDelete();
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Category deleted.',
-        ]);
+        ProductCategory::where('organization_id', $user->organization_id)
+            ->findOrFail($id)
+            ->forceDelete(); // hard delete — SET NULL fires at DB level on products
     }
 }

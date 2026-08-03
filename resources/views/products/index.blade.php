@@ -20,22 +20,19 @@
         </div>
     @endif
 
-    <section class="text-gray-700">
+    <section class="text-gray-700 bg-white">
         <div>
             <div class="flex justify-center">
                 <table id="example" class="table-auto table-style w-full mx-auto">
                     <thead>
                         <tr>
                             <th class="border border-gray-300 px-4 py-2">Name</th>
+                            <th class="border border-gray-300 px-4 py-2">Category</th>
                             <th class="border border-gray-300 px-4 py-2">Price</th>
                             <th class="border border-gray-300 px-4 py-2">Unit</th>
                             <th class="border border-gray-300 px-4 py-2">Taxable</th>
                             <th class="border border-gray-300 px-4 py-2">Status</th>
                             <th class="border border-gray-300 px-4 py-2">
-                                <a href="{{ route('products.create') }}"
-                                   class="justify-center transform motion-safe:hover:scale-90 text-white bg-[#5727e7] py-2 px-8 focus:outline-none hover:bg-orange-600 rounded-lg shadow-2xl text-lg">
-                                    +
-                                </a>
                             </th>
                         </tr>
                     </thead>
@@ -48,6 +45,7 @@
                                         {{ $product->name }}
                                     </a>
                                 </td>
+                                <td class="border border-gray-300 px-4 py-2"></td>
                                 <td class="border border-gray-300 px-4 py-2">R {{ number_format($product->price, 2) }}</td>
                                 <td class="border border-gray-300 px-4 py-2">{{ $product->unit ?? '—' }}</td>
                                 <td class="border border-gray-300 px-4 py-2">
@@ -90,7 +88,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                    class="text-gray-800 text-xs bg-white hover:bg-orange-300 border border-gray-300 rounded-lg font-medium px-2 py-2 inline-flex space-x-2 items-center">
+                                                    class="text-gray-800 text-xs bg-white hover:bg-red-300 border border-gray-300 rounded-lg font-medium px-2 py-2 inline-flex space-x-2 items-center">
                                                 <span>
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                                         stroke="currentColor" class="w-5 h-5">

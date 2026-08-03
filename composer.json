@@ -13,6 +13,7 @@
         "laravel/socialite": "^5.28",
         "laravel/tinker": "^3.0",
         "league/flysystem-aws-s3-v3": "^3.34",
+        "mallardduck/blade-lucide-icons": "^2.0",
         "spatie/laravel-permission": "^7.4"
     },
     "require-dev": {

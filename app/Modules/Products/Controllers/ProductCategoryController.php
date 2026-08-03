@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Modules\Products\Requests\CreateProductCategoryRequest;
 use App\Modules\Products\Requests\UpdateProductCategoryRequest;
 use App\Modules\Products\Services\ProductCategoryService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ProductCategoryController extends Controller
 {
@@ -14,23 +15,51 @@ class ProductCategoryController extends Controller
         protected ProductCategoryService $productCategoryService,
     ) {}
 
-    public function index(): JsonResponse
+    public function index(): View
     {
-        return $this->productCategoryService->index(auth()->user());
+        $categories = $this->productCategoryService->index(auth()->user());
+
+        return view('products.categories.index', compact('categories'));
     }
 
-    public function store(CreateProductCategoryRequest $request): JsonResponse
+    public function create(): View
     {
-        return $this->productCategoryService->store(auth()->user(), $request->validated());
+        return view('products.categories.create');
     }
 
-    public function update(UpdateProductCategoryRequest $request, int $id): JsonResponse
+    public function store(CreateProductCategoryRequest $request): RedirectResponse
     {
-        return $this->productCategoryService->update(auth()->user(), $request->validated(), $id);
+        $result = $this->productCategoryService->store(auth()->user(), $request->validated());
+
+        if ($result['status'] === 'error') {
+            return back()->withErrors(['name' => $result['message']])->withInput();
+        }
+
+        return redirect()->route('products.categories.index')->with('success', 'Category created.');
     }
 
-    public function destroy(int $id): JsonResponse
+    public function edit(int $id): View
     {
-        return $this->productCategoryService->destroy(auth()->user(), $id);
+        $category = $this->productCategoryService->show(auth()->user(), $id);
+
+        return view('products.categories.edit', compact('category'));
+    }
+
+    public function update(UpdateProductCategoryRequest $request, int $id): RedirectResponse
+    {
+        $result = $this->productCategoryService->update(auth()->user(), $id, $request->validated());
+
+        if ($result['status'] === 'error') {
+            return back()->withErrors(['name' => $result['message']])->withInput();
+        }
+
+        return redirect()->route('products.categories.index')->with('success', 'Category updated.');
+    }
+
+    public function destroy(int $id): RedirectResponse
+    {
+        $this->productCategoryService->destroy(auth()->user(), $id);
+
+        return redirect()->route('products.categories.index')->with('success', 'Category deleted.');
     }
 }

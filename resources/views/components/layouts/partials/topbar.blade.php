@@ -8,7 +8,7 @@
         <input 
             type="text" 
             placeholder="Search dashboard" 
-            class="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl pl-11 pr-4 py-2.5 text-[14px] text-[#030712] placeholder-[#6b7280] focus:outline-none focus:bg-[#ffffff] focus:border-[#5727e7] focus:ring-[1px] focus:ring-[#5727e7] transition-all"
+            class="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl pl-11 pr-4 py-2.5 text-[14px] text-[#030712] placeholder-[#6b7280] focus:outline-none focus:bg-[#ffffff] focus:border-[#008374] focus:ring-[1px] focus:ring-[#008374] transition-all"
         >
 
         <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
@@ -28,7 +28,7 @@
 
         <div class="w-px h-6 bg-[#e5e7eb]"></div>
         
-        <button class="bg-[#5727e7] text-[#ffffff] text-[14px] font-medium px-4 py-2.5 rounded-xl shadow-md hover:bg-[#4a1fd4] transition-colors flex items-center gap-2">
+        <button class="bg-[#008374] text-[#ffffff] text-[14px] font-medium px-4 py-2.5 rounded-xl shadow-md hover:bg-[#4a1fd4] transition-colors flex items-center gap-2">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             Create
         </button>
