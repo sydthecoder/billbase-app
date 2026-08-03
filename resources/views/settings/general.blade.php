@@ -451,7 +451,7 @@
                             type="submit"
                             :disabled="loading"
                         >
-                            <x-ui.buttons.button-loader  />
+                            <x-ui.button-loader  />
                             <span x-text="loading ? 'Saving' : 'Save changes'"></span>
                         </button>
                     </div>
