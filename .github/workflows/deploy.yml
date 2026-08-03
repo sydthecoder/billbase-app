@@ -15,9 +15,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            whoami
+            set -e
             cd ${{ secrets.DEPLOY_PATH }}
-            git pull origin main
+            git fetch origin
+            git reset --hard origin/main
             composer install --no-dev --optimize-autoloader
             npm install
             npm run build
