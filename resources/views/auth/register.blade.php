@@ -1,4 +1,4 @@
-<x-layouts.auth title="Login">
+<x-layouts.auth title="Register">
     <section class="w-full min-h-screen bg-[#f9fafb] flex flex-col items-center justify-center px-6 py-16">
         
         <a href="#" class="mb-8">
