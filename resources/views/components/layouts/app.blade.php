@@ -3,7 +3,7 @@
 
 <head> 
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Volt - Free Bootstrap 5 Dashboard</title>
+    <title>BillBase - {{ $title ?? 'Dashboard' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
@@ -28,7 +28,7 @@
         <div class="md:pl-65">
             <x-layouts.partials.topbar />
 
-            <main class="min-h-[80vh] mt-16 p-6">
+            <main class="min-h-[75vh] mt-16 p-6">
                 {{ $slot }}
             </main>
             
