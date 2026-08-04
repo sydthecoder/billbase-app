@@ -1,5 +1,5 @@
 <x-layouts.auth title="Register">
-    <section class="w-full bg-[#f9fafb] flex flex-col items-center justify-center px-6 py-12">
+    <section class="w-full flex flex-col items-center justify-center px-6 py-12">
         
         <a href="{{ route('register') }}" class="mb-6">
             <img src="{{ asset('images/brand/logo.png') }}" alt="BillBase Logo" class="h-12">

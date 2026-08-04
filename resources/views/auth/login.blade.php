@@ -1,5 +1,5 @@
 <x-layouts.auth title="Login">
-    <section class="w-full bg-[#f9fafb] flex flex-col items-center justify-center px-6 py-12">
+    <section class="w-full flex flex-col items-center justify-center px-6 py-12">
         
         <a href="{{ route('login') }}" class="mb-6">
             <img src="{{ asset('images/brand/logo.png') }}" alt="BillBase Logo" class="h-12">
@@ -39,7 +39,7 @@
                 @csrf
             
                 <div class="flex flex-col gap-2">
-                    <label for="email" class="text-[14px] font-medium text-dark-500">Work Email</label>
+                    <label for="email" class="text-[14px] font-medium text-dark-500">Email</label>
                     <input 
                         name="email" 
                         type="email" 
