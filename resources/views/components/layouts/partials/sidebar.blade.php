@@ -19,7 +19,7 @@
 <aside class="hidden md:flex md:flex-col md:w-65 bg-white fixed top-0 left-0 h-full border-r border-[#e5e7eb]">
     <div class="h-18 flex items-center px-6 border-b border-[#e5e7eb]">
         <a href="{{ url('/') }}">
-            <img src="{{ asset('images/brand/logo.png') }}" alt="BillBase Logo" class="h-12">
+            <img src="{{ asset('images/brand/logo.png') }}" alt="BillBase Logo" class="h-10">
         </a>
     </div>
 
