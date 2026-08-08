@@ -5,11 +5,6 @@
         ['route' => 'settings.preferences.index', 'active' => 'settings.preferences.*', 'label' => 'Preferences'],
     ];
 
-    $invoicesLinks = [
-        ['route' => 'invoices.index', 'active' => 'invoices.index*', 'label' => 'One Time'],
-        ['route' => 'invoices.index', 'active' => 'invoices.index.*', 'label' => 'Recurring'],
-    ];
-
     $productsLinks = [
         ['route' => 'products.index', 'active' => ['products.index', 'products.create', 'products.show', 'products.edit'], 'label' => 'List'],
         ['route' => 'products.categories.index', 'active' => 'products.categories.*', 'label' => 'Categories'],
@@ -32,28 +27,13 @@
             Overview
         </a>
 
-        <div class="flex flex-col gap-1" x-data="{ open: {{ request()->routeIs('invoices.*') ? 'true' : 'false' }} }">
-            <button 
-                @click="open = !open" type="button"
-                class="w-full flex items-center justify-between px-3 py-3 rounded-md font-medium text-[#4b5563] transition-colors"
-            >
-                <div class="flex items-center gap-3">
-                    <x-lucide-receipt-text class="w-5 h-5" />
-                    Invoices
-                </div>
-
-                <x-lucide-chevron-down class="w-5 h-5" />
-            </button>
-
-            <div x-show="open" x-transition class="flex flex-col gap-1 pl-9 pr-2">
-                @foreach ($invoicesLinks as $link)
-                    <a href="{{ route($link['route']) }}"
-                       class="block px-3 py-2 rounded-md text-[14px] transition-colors {{ request()->routeIs($link['active']) ? 'font-semibold text-primary-500 bg-primary-50' : 'font-medium text-[#4b5563] hover:text-primary-500 hover:bg-[#f9fafb]' }}">
-                        {{ $link['label'] }}
-                    </a>
-                @endforeach
-            </div>
-        </div>
+        <a 
+            href="{{ route('invoices.index') }}" 
+            class="flex items-center gap-3 px-3 py-2.5 rounded-md font-medium transition-colors {{ request()->routeIs('invoices*') ? 'text-primary-500 bg-primary-50' : 'text-[#4b5563] hover:bg-[#f9fafb] hover:text-primary-500' }}"
+        >
+            <x-lucide-receipt-text class="w-5 h-5" />
+            Invoices
+        </a>
 
         <a 
             href="{{ route('quotes.index') }}"

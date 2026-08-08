@@ -185,7 +185,7 @@
                 <div class="fixed bottom-0 right-0 left-65 bg-white shadow-lg px-6 py-4 border border-[#e5e7eb]">
                     <div class="flex justify-end">
                         <button 
-                            class="w-fit bg-primary-500 text-white font-medium px-4 py-2.5 rounded-xl shadow-md hover:bg-[#4a1fd4] transition-colors" 
+                            class="w-fit bg-primary-500 text-white font-medium px-4 py-2.5 rounded-xl shadow-md hover:bg-primary-600 transition-colors" 
                             type="submit"
                             :disabled="loading"
                         >

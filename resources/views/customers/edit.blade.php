@@ -26,7 +26,7 @@
                             Cancel
                         </a>
                         <button
-                            class="w-fit bg-primary-500 text-white font-medium px-4 py-2.5 rounded-xl shadow-md hover:bg-[#4a1fd4] transition-colors"
+                            class="w-fit bg-primary-500 text-white font-medium px-4 py-2.5 rounded-xl shadow-md hover:bg-primary-600 transition-colors"
                             type="submit"
                             :disabled="loading"
                         >
