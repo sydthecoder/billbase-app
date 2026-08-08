@@ -6,8 +6,8 @@
     ];
 
     $invoicesLinks = [
-        ['route' => 'settings.general.index', 'active' => 'settings.general.*', 'label' => 'One Time'],
-        ['route' => 'settings.mail.index', 'active' => 'settings.mail.*', 'label' => 'Recurring'],
+        ['route' => 'invoices.index', 'active' => 'invoices.index*', 'label' => 'One Time'],
+        ['route' => 'invoices.index', 'active' => 'invoices.index.*', 'label' => 'Recurring'],
     ];
 
     $productsLinks = [
@@ -32,7 +32,7 @@
             Overview
         </a>
 
-        <div class="flex flex-col gap-1" x-data="{ open: {{ request()->routeIs('settings.*') ? 'true' : 'false' }} }">
+        <div class="flex flex-col gap-1" x-data="{ open: {{ request()->routeIs('invoices.*') ? 'true' : 'false' }} }">
             <button 
                 @click="open = !open" type="button"
                 class="w-full flex items-center justify-between px-3 py-3 rounded-md font-medium text-[#4b5563] transition-colors"
